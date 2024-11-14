@@ -5,7 +5,6 @@ const DocumentationPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  // Add scroll padding to document when component mounts
   useEffect(() => {
     document.documentElement.style.scrollPaddingTop = "80px"; // Adjust this value based on your navbar height
     return () => {
