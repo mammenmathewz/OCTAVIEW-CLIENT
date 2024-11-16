@@ -12,7 +12,6 @@ import AdminDash from "./pages/admin/AdminDash"
 import AdminLogin from "./pages/admin/Login"
 import ProtectedRoute from "./utils/ProtectedRoutes"
 
-
 function App() {
   return (
     <>
@@ -34,7 +33,6 @@ function App() {
       <Route path="/admin" element={<AdminDash/>}/>
       <Route path="/admin-login" element={<AdminLogin/>}/>
 
- 
      </Routes>
      </BrowserRouter>
     </>

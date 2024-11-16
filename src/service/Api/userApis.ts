@@ -20,3 +20,12 @@ export const signupUser = async (credentials:SignupCredentials):Promise<any>=>{
     throw error
   }
 }
+
+export const generateOtp = async ()=>{
+  try {
+    const response = await axiosInstance.post('/generate_otp')
+  } catch (error) {
+    console.log("otp generate req failed",error)
+    throw error
+  }
+}

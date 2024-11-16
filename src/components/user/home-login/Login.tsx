@@ -31,7 +31,7 @@ export function LoginForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate()
 
-  const { 
+  const {
     mutate,
     isPending,     // use isPending instead of isLoading
     isError,       // can use isError for error state checks
@@ -53,7 +53,7 @@ export function LoginForm() {
     e.preventDefault();
     mutate({ email, password });
   };
- 
+
 
 
   return (
@@ -91,13 +91,14 @@ export function LoginForm() {
         <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-8 h-[1px] w-full" />
 
         <button
-          className="relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 dark:bg-zinc-900 dark:shadow-[0px_0px_1px_1px_var(--neutral-800)]"
+          className="relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 hover:bg-gray-100 transition duration-300"
           type="submit"
         >
-          <IconBrandGoogle className="h-4 w-4 text-neutral-800 dark:text-neutral-300" />
-          <span className="text-neutral-700 dark:text-neutral-300 text-sm">Google</span>
+          <IconBrandGoogle className="h-4 w-4 text-neutral-800" />
+          <span className="text-neutral-700 text-sm">Google</span>
           <BottomGradient />
         </button>
+
       </form>
     </div>
   );

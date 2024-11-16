@@ -9,6 +9,8 @@ import { SignupCredentials } from '../../../lib/interface';
 import { useDispatch } from 'react-redux';
 import { login } from '../../../service/redux/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast"
+
 
 
 export function SignupForm() {
@@ -21,9 +23,10 @@ export function SignupForm() {
     twitterPassword: '',
   });
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const [passwordFocus,setPasswordFocus]=useState(false)
-  const dispatch =  useDispatch()
-  const navigate = useNavigate()
+  const [passwordFocus, setPasswordFocus] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { toast } = useToast()
 
   const validate = (value: string) => {
     const errors: string[] = [];
@@ -51,25 +54,35 @@ export function SignupForm() {
     }
   };
 
-  const handleFocus=()=>{
-    setPasswordFocus(true)
-  }
-  const handleBlur=()=>{
-    setPasswordFocus(false)
-  }
+  const handleFocus = () => {
+    setPasswordFocus(true);
+  };
+  const handleBlur = () => {
+    setPasswordFocus(false);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-   if (step===3) {
-    mutate({
-      companyName: formData.company,
-      email: formData.email,
-      password: formData.password,
-    });
-    console.log("Form submitted", formData);
-   }else{
-    setStep(step+1)
-   }   
+    if (step === 1) {
+      toast({
+        title: "Signup Successful",
+        description: "You have successfully signed up!",
+        variant: "default", // Optional based on toast configuration
+      });
+      
+      setStep(step + 1);
+    }
+    if (step === 2) {
+      setStep(step + 1);
+    }
+    if (step === 3) {
+      mutate({
+        companyName: formData.company,
+        email: formData.email,
+        password: formData.password,
+      });
+      console.log("Form submitted", formData);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,21 +94,22 @@ export function SignupForm() {
       setFormData({ ...formData, [id]: value });
 
       if (id === 'password') {
-        validate(value); 
+        validate(value);
       }
     }
   };
-  const { mutate, isPending, isError, error, data } = useMutation<any,Error,SignupCredentials>({
+
+  const { mutate, isPending, isError, error, data } = useMutation<any, Error, SignupCredentials>({
     mutationFn: (credentials) => signupUser(credentials),
     onSuccess: (data) => {
       dispatch(login(data.token));
       console.log("Signup successful", data);
-      navigate('/dash')
+      navigate('/dash');
     },
     onError: (error) => {
       if ((error as any).response?.data?.error) {
         const serverError = (error as any).response.data.error;
-        console.error("Signup error:", serverError)
+        console.error("Signup error:", serverError);
       } else {
         console.error("Unexpected error:", error);
       }
@@ -103,8 +117,8 @@ export function SignupForm() {
   });
 
   return (
-    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white dark:bg-black">
-      <h2 className="font-bold text-xl text-neutral-800 dark:text-neutral-200">
+    <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white">
+      <h2 className="font-bold text-xl text-neutral-800">
         Welcome to Octaview
       </h2>
 
@@ -132,7 +146,7 @@ export function SignupForm() {
               />
             </LabelInputContainer>
             <button
-              className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+              className="bg-gradient-to-br relative group/btn from-black to-neutral-600 block w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
             >
               Next &rarr;
               <BottomGradient />
@@ -154,8 +168,7 @@ export function SignupForm() {
               />
             </LabelInputContainer>
             <button
-              className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
-             
+              className="bg-gradient-to-br relative group/btn from-black to-neutral-600 block w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
             >
               Next &rarr;
               <BottomGradient />
@@ -176,13 +189,13 @@ export function SignupForm() {
                 onFocus={handleFocus}
                 onBlur={handleBlur}
               />
-               {passwordFocus && errorMessages.length > 0 && (
-            <div className="text-sm text-red-500 mt-2">
-              {errorMessages.map((error, index) => (
-                <p key={index}>{error}</p>
-              ))}
-            </div>
-          )}
+              {passwordFocus && errorMessages.length > 0 && (
+                <div className="text-sm text-red-500 mt-2">
+                  {errorMessages.map((error, index) => (
+                    <p key={index}>{error}</p>
+                  ))}
+                </div>
+              )}
             </LabelInputContainer>
 
             <LabelInputContainer className="mb-8">
@@ -196,7 +209,7 @@ export function SignupForm() {
               />
             </LabelInputContainer>
             <button
-              className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+              className="bg-gradient-to-br relative group/btn from-black to-neutral-600 block w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
               type="submit"
             >
               Sign up &rarr;
@@ -205,7 +218,7 @@ export function SignupForm() {
           </>
         )}
 
-        <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-8 h-[1px] w-full" />
+        <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-8 h-[1px] w-full" />
       </form>
     </div>
   );
