@@ -8,6 +8,8 @@ import { useDispatch } from "react-redux";
 import { loginUser } from "../../../service/Api/userApis";
 import { login } from "../../../service/redux/authSlice";
 import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "../../ui/alert"
+import { AlertCircle } from "lucide-react"
 
 interface User {
   id: string;
@@ -28,6 +30,9 @@ interface LoginResponse {
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
   const dispatch = useDispatch();
   const navigate = useNavigate()
 
@@ -46,7 +51,10 @@ export function LoginForm() {
     },
     onError: (error: Error) => {
       console.error("Login failed:", error);
+      setAlertMessage(error.message || "An unexpected error occurred.");
+      setAlertVisible(true);
     },
+    
   });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -58,6 +66,13 @@ export function LoginForm() {
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white">
+          {alertVisible && (
+        <Alert variant='default' className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
       <h2 className="font-bold text-xl text-neutral-800">Welcome to Octaview</h2>
 
       <form className="my-8" onSubmit={handleSubmit}>

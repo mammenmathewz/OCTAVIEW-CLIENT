@@ -9,7 +9,7 @@ import { SignupCredentials } from '../../../lib/interface';
 import { useDispatch } from 'react-redux';
 import { login } from '../../../service/redux/authSlice';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from "@/hooks/use-toast"
+
 
 
 
@@ -26,7 +26,6 @@ export function SignupForm() {
   const [passwordFocus, setPasswordFocus] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { toast } = useToast()
 
   const validate = (value: string) => {
     const errors: string[] = [];
@@ -64,11 +63,6 @@ export function SignupForm() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (step === 1) {
-      toast({
-        title: "Signup Successful",
-        description: "You have successfully signed up!",
-        variant: "default", // Optional based on toast configuration
-      });
       
       setStep(step + 1);
     }
