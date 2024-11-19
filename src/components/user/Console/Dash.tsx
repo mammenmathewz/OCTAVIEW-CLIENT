@@ -82,11 +82,14 @@ export function SidebarDash() {
       </Sidebar>
 
       {/* This is where the content changes based on the sidebar link */}
-      <div className="flex flex-1 w-full">
-        <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 bg-white flex flex-col gap-2 flex-1 w-full h-full">
-          <Outlet /> 
-        </div>
-      </div>
+      <div
+  className={cn(
+    "p-2 md:p-10 rounded-tl-2xl border border-neutral-200 bg-white flex flex-col gap-2 flex-1 w-full h-full",
+    "overflow-y-auto"
+  )}
+>
+  <Outlet />
+</div>
     </div>
   );
 }
@@ -103,7 +106,7 @@ export const Logo = () => {
         animate={{ opacity: 1 }}
         className="font-medium text-black whitespace-pre"
       >
-        Acet Labs
+        Octaview
       </motion.span>
     </Link>
   );
