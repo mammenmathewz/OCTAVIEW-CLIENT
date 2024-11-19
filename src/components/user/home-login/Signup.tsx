@@ -167,10 +167,10 @@ export function SignupForm() {
   
   const { mutate, isPending, isError, error, data } = useMutation<any, Error, SignupCredentials>({
     mutationFn: (credentials) => signupUser(credentials),
-    onSuccess: (data) => {
-      dispatch(login(data.token));
+    onSuccess:  (data) => {
+       dispatch(login(data.token));
       console.log("Signup successful", data);
-      navigate('/dash');
+      navigate('/dash/candidates',{replace:true});
     },
     onError: (error) => {
       if ((error as any).response?.data?.error) {

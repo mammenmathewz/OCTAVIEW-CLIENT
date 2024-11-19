@@ -8,54 +8,60 @@ import {
   IconSettings,
   IconUserBolt,
 } from "@tabler/icons-react";
-import { Link, Outlet } from "react-router-dom";  // Import Outlet here
+import { Link, Outlet, useNavigate } from "react-router-dom";  // Import Outlet here
 import { motion } from "framer-motion";
 import { cn } from "../../../lib/utils";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../service/redux/authSlice";
+
+// SidebarDash.tsx
+interface Links {
+  label: string;
+  href: string;
+  icon: JSX.Element;
+  onClick?: () => void;  // Make onClick required
+}
+
 
 export function SidebarDash() {
-  const links = [
+
+  const links: Links[] = [
     {
       label: "Candidates",
-      href: "/dash/candidates",  // Update href to match the route
+      href: "/dash/candidates",
       icon: (
         <IconBrandTabler className="text-neutral-700 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Selected Candidates",
-      href: "/dash/selected-candidates",  // Update href to match the route
+      href: "/dash/selected-candidates",
       icon: (
         <IconUserBolt className="text-neutral-700 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Scheduled Interviews",
-      href: "/dash/scheduled-iterviews",  // Update href to match the route
+      href: "/dash/scheduled-iterviews",
       icon: (
         <IconUserBolt className="text-neutral-700 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Jobs",
-      href: "/dash/jobs",  // Update href to match the route
+      href: "/dash/jobs",
       icon: (
         <IconUserBolt className="text-neutral-700 h-5 w-5 flex-shrink-0" />
       ),
     },
     {
       label: "Settings",
-      href: "/dash/settings",  // Update href to match the route
+      href: "/dash/settings",
       icon: (
         <IconSettings className="text-neutral-700 h-5 w-5 flex-shrink-0" />
       ),
     },
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="text-neutral-700 h-5 w-5 flex-shrink-0" />
-      ),
-    },
+ 
   ];
 
   const [open, setOpen] = useState(false);
@@ -67,7 +73,7 @@ export function SidebarDash() {
         "h-screen"
       )}
     >
-      <Sidebar open={open} setOpen={setOpen}>
+    <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden w-full">
             {open ? <Logo /> : <LogoIcon />}
@@ -77,19 +83,18 @@ export function SidebarDash() {
               ))}
             </div>
           </div>
-          <div></div>
         </SidebarBody>
       </Sidebar>
 
       {/* This is where the content changes based on the sidebar link */}
       <div
-  className={cn(
-    "p-2 md:p-10 rounded-tl-2xl border border-neutral-200 bg-white flex flex-col gap-2 flex-1 w-full h-full",
-    "overflow-y-auto"
-  )}
->
-  <Outlet />
-</div>
+        className={cn(
+          "p-2 md:p-10 rounded-tl-2xl border border-neutral-200 bg-white flex flex-col gap-2 flex-1 w-full h-full",
+          "overflow-y-auto"
+        )}
+      >
+        <Outlet />
+      </div>
     </div>
   );
 }

@@ -130,7 +130,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onDelete, onHide }) => {
                 e.stopPropagation();
                 onDelete(job.id);
               }}
-             variant='outline'
+             variant='default'
             >
               Delete
             </Button>

@@ -8,8 +8,6 @@ import { useDispatch } from "react-redux";
 import { loginUser } from "../../../service/Api/userApis";
 import { login } from "../../../service/redux/authSlice";
 import { useNavigate } from "react-router-dom";
-import { Alert, AlertDescription, AlertTitle } from "../../ui/alert"
-import { AlertCircle } from "lucide-react"
 import { useToast } from "../../../@/hooks/use-toast";
 
 interface User {
