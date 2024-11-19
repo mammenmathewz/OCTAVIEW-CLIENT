@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from "../../ui/Login_ui/label";
 import { Input } from "../../ui/Login_ui/input";
 import { cn } from "../../../lib/utils";
-import validator from 'validator'; 
+import validator from 'validator';
 import { useMutation } from '@tanstack/react-query';
-import { signupUser } from '../../../service/Api/userApis';
+import { generateOtp, signupUser, verify } from '../../../service/Api/userApis';
 import { SignupCredentials } from '../../../lib/interface';
 import { useDispatch } from 'react-redux';
 import { login } from '../../../service/redux/authSlice';
 import { useNavigate } from 'react-router-dom';
-
-
-
+import { Button } from '../../ui/button';
+import { useToast } from '../../../@/hooks/use-toast';
+import debounce from 'lodash.debounce';
 
 export function SignupForm() {
   const [step, setStep] = useState(1);
   const [otp, setOtp] = useState('');
+  const [otpStatus, setOtpStatus] = useState({ status: true, count: 30 });
   const [formData, setFormData] = useState({
     company: '',
     email: '',
@@ -26,6 +27,7 @@ export function SignupForm() {
   const [passwordFocus, setPasswordFocus] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const {toast}=useToast()
 
   const validate = (value: string) => {
     const errors: string[] = [];
@@ -56,43 +58,104 @@ export function SignupForm() {
   const handleFocus = () => {
     setPasswordFocus(true);
   };
+
   const handleBlur = () => {
     setPasswordFocus(false);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const startCountdown = () => {
+    setOtpStatus({ status: true, count: 30 });
+  };
+
+  const confirmPassword=()=>{
+    return formData.password===formData.twitterPassword
+  }
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (otpStatus.status && otpStatus.count > 0) {
+      interval = setInterval(() => {
+        setOtpStatus((prev) => ({ ...prev, count: prev.count - 1 }));
+      }, 1000);
+    }
+
+    if (otpStatus.count === 0) {
+      setOtpStatus({ status: false, count: 30 }); // Enable the button after countdown ends
+      if (interval) clearInterval(interval);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [otpStatus]);
+
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (step === 1) {
-      
+      await generateOtp(formData.email);
       setStep(step + 1);
-    }
-    if (step === 2) {
-      setStep(step + 1);
-    }
-    if (step === 3) {
+      startCountdown();
+    } else if (step === 3) {
+     if (confirmPassword()) {
       mutate({
         companyName: formData.company,
         email: formData.email,
         password: formData.password,
       });
-      console.log("Form submitted", formData);
+     }else{
+      toast({
+        description: 'Password is not matching',
+        variant: 'default',
+      })
+     }
     }
   };
+  const handleOtpVerification = debounce(async (otp: string) => {
+    try {
+      const res = await verify(formData.email, otp);
+      console.log("OTP verified:", formData.email, otp);
+      if (res) {
+        setStep(3);
+        toast({
+          description: 'OTP Verification sucess',
+          variant: 'default',
+        })
+
+      } 
+    } catch (error) {
+      setOtp('');  
+      toast({
+        title: 'OTP Verification Failed',
+        description: 'The OTP you entered is invalid or expired. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  }, 1000); // Adjusted debounce time
+  
+  
+  
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     if (id === 'otp') {
       const sanitizedOtp = value.replace(/\D/g, '').slice(0, 6);
-      setOtp(sanitizedOtp);
+      setOtp(sanitizedOtp);  
+      console.log(sanitizedOtp, "Updated OTP");
+      if (sanitizedOtp.length === 6) {
+        handleOtpVerification(sanitizedOtp); 
+      }
     } else {
       setFormData({ ...formData, [id]: value });
-
-      if (id === 'password') {
-        validate(value);
-      }
+    }
+    if (id === 'password') {
+      validate(value);
     }
   };
-
+  
+  
   const { mutate, isPending, isError, error, data } = useMutation<any, Error, SignupCredentials>({
     mutationFn: (credentials) => signupUser(credentials),
     onSuccess: (data) => {
@@ -103,12 +166,23 @@ export function SignupForm() {
     onError: (error) => {
       if ((error as any).response?.data?.error) {
         const serverError = (error as any).response.data.error;
+        toast({
+          title: 'Signup Error',
+          description: serverError || 'An unexpected error occurred during signup.',
+          variant: 'destructive', 
+        });
         console.error("Signup error:", serverError);
       } else {
+        toast({
+          title: 'Unexpected Error',
+          description: 'Something went wrong. Please try again later.',
+          variant: 'destructive', 
+        });
         console.error("Unexpected error:", error);
       }
     },
   });
+  
 
   return (
     <div className="max-w-md w-full mx-auto rounded-none md:rounded-2xl p-4 md:p-8 shadow-input bg-white">
@@ -127,6 +201,7 @@ export function SignupForm() {
                 onChange={handleInputChange}
                 placeholder=""
                 type="text"
+                required
               />
             </LabelInputContainer>
             <LabelInputContainer className="mb-4">
@@ -137,6 +212,7 @@ export function SignupForm() {
                 onChange={handleInputChange}
                 placeholder="projectmayhem@fc.com"
                 type="email"
+                required
               />
             </LabelInputContainer>
             <button
@@ -147,28 +223,46 @@ export function SignupForm() {
             </button>
           </>
         )}
+       {step === 2 && (
+  <>
+    <LabelInputContainer className="mb-4">
+      <Label htmlFor="otp">OTP</Label>
+      <Input
+        id="otp"
+        value={otp}
+        onChange={(e) => {
+          handleInputChange(e);
+          if (e.target.value.length === 6 && e.target.value === otp) {
+            handleOtpVerification(otp); 
+          }
+        }}
+        
+        placeholder="OTP"
+        type="text"
+        maxLength={6}
+        onPaste={(e) => {
+          e.preventDefault();
+          alert("Pasting is not allowed in this field.");
+        }}
+      />
+      <Button
+        variant="outline"
+        disabled={otpStatus.status} // Initially disabled, also disabled during countdown
+        onClick={() => {
+          if (!otpStatus.status) {
+            startCountdown(); // Restart countdown when clicked
+            generateOtp(formData.email);
+            setOtp('');  // Reset OTP after generating new one
+          }
+        }}
+      >
+        {otpStatus.status ? `${otpStatus.count} sec` : `Resend OTP`}
+      </Button>
+    </LabelInputContainer>
+  </>
+)}
 
-        {step === 2 && (
-          <>
-            <LabelInputContainer className="mb-4">
-              <Label htmlFor="otp">OTP</Label>
-              <Input
-                id="otp"
-                value={otp}
-                onChange={handleInputChange}
-                placeholder="OTP"
-                type="text"
-                maxLength={6}
-              />
-            </LabelInputContainer>
-            <button
-              className="bg-gradient-to-br relative group/btn from-black to-neutral-600 block w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
-            >
-              Next &rarr;
-              <BottomGradient />
-            </button>
-          </>
-        )}
+
 
         {step === 3 && (
           <>

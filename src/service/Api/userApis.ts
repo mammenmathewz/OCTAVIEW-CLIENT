@@ -21,11 +21,25 @@ export const signupUser = async (credentials:SignupCredentials):Promise<any>=>{
   }
 }
 
-export const generateOtp = async ()=>{
+export const generateOtp = async (email:string)=>{
   try {
-    const response = await axiosInstance.post('/generate_otp')
+    const response = await axiosInstance.post('/generate_otp',{email})
+    return response
   } catch (error) {
     console.log("otp generate req failed",error)
     throw error
   }
 }
+
+export const verify = async (email: string, otp: string) => {
+  try {
+    console.log("OTP in verify:", otp); // Log OTP in verify function
+    const response = await axiosInstance.post('/verify_otp', { email, otp });
+    return response;
+  } catch (error) {
+    console.log("OTP verification request failed", error);
+    throw error;
+  }
+};
+
+ 
