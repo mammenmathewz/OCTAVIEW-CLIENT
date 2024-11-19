@@ -93,25 +93,34 @@ export function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (step === 1) {
-      await generateOtp(formData.email);
-      setStep(step + 1);
-      startCountdown();
-    } else if (step === 3) {
-     if (confirmPassword()) {
-      mutate({
-        companyName: formData.company,
-        email: formData.email,
-        password: formData.password,
-      });
-     }else{
+  
+    try {
+      if (step === 1) {
+        await generateOtp(formData.email);
+        setStep(step + 1); 
+        startCountdown();  
+      } else if (step === 3) {
+        if (confirmPassword()) {
+          mutate({
+            companyName: formData.company,
+            email: formData.email,
+            password: formData.password,
+          });
+        } else {
+          toast({
+            description: 'Password is not matching',
+            variant: 'default',
+          });
+        }
+      }
+    } catch (error: any) {
       toast({
-        description: 'Password is not matching',
-        variant: 'default',
-      })
-     }
+        description: error.message || 'An unexpected error occurred while generating OTP',
+        variant: 'destructive',
+      });
     }
   };
+  
   const handleOtpVerification = debounce(async (otp: string) => {
     try {
       const res = await verify(formData.email, otp);

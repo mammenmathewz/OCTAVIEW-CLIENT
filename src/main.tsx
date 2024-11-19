@@ -11,8 +11,7 @@ const queryClient = new QueryClient();
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        
+      <QueryClientProvider client={queryClient}> 
         <App />
        <Toaster/>
       </QueryClientProvider>

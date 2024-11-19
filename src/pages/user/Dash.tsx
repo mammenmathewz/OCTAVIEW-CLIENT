@@ -1,9 +1,12 @@
-import React from 'react'
+import { SidebarDash } from "../../components/user/Console/Dash";
 
 function Dash() {
   return (
-    <div>Dash</div>
-  )
+    <div className="flex">
+      <SidebarDash />
+    
+    </div>
+  );
 }
 
-export default Dash
+export default Dash;
