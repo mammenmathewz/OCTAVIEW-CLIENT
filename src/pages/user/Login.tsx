@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LoginForm } from "../../components/user/home-login/Login";
 import { SignupForm } from "../../components/user/home-login/Signup";
+import {  useSelector} from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { selectAccessToken } from "../../service/redux/store";
 
 function Login() {
   const [activeTab, setActiveTab] = useState("login");
-
+  const navigate = useNavigate()
+  const token = useSelector(selectAccessToken)
+  useEffect(()=>{
+    if (token) {
+      navigate('/dash',{replace:true})
+    }
+  },[navigate,token])
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-start justify-center h-screen px-4 lg:px-20">
       

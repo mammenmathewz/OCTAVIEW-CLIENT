@@ -1,247 +1,147 @@
+import React, { useState } from "react";
+import "../../components/Styles/Scroll.css"; // Ensure this path is correct
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import JobForm from "../../components/user/Console/JobForm";
 import JobCard from "../../components/user/Console/JobCard";
-import { useState } from "react";
 
-const jobs = [
-  {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  },
-  {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  },
-  {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  }, {
-    id: "job2",
-    job_title: "Data Scientist",
-    skills: "Python, SQL, Machine Learning",
-    job_role: "Data Analyst",
-    min_salary: 60000,
-    max_salary: 90000,
-    job_level: "Senior",
-    location: "Kochi, Kerala, India",
-    city: "Kochi",
-    description:
-      "We are looking for a talented Data Scientist to join our team. You will be responsible for analyzing large datasets and developing machine learning models.",
-    hidden: false,
-  },
-];
-function JobList() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortOption, setSortOption] = useState("job_title");
-  const [filteredJobs, setFilteredJobs] = useState(jobs);
+function JobPage() {
+  const [leftCards, setLeftCards] = useState<string[]>([]);
+  const [rightCard, setRightCard] = useState(true);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    filterAndSortJobs(term, sortOption);
-  };
-
-  const handleSort = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const option = e.target.value;
-    setSortOption(option);
-    filterAndSortJobs(searchTerm, option);
-  };
-
-  const filterAndSortJobs = (term: string, option: string) => {
-    const filtered = jobs.filter(
-      (job) =>
-        job.job_title.toLowerCase().includes(term) ||
-        job.skills.toLowerCase().includes(term) ||
-        job.location.toLowerCase().includes(term)
-    );
-
-    const sorted = filtered.sort((a, b) =>
-      a[option as keyof typeof a].toString().localeCompare(
-        b[option as keyof typeof b].toString()
-      )
-    );
-
-    setFilteredJobs(sorted);
-  };
-
-  const handleDelete = (id: string) => {
-    console.log("Deleted Job ID:", id);
-    // Add delete logic here
-  };
-
-  const handleHide = (id: string) => {
-    console.log("Hid Job ID:", id);
-    // Add hide logic here
+  const rightState = () => {
+    setRightCard(false);
   };
 
   return (
-    <div className="p-10">
-      {/* Search and Sort Controls */}
-      <div className="flex items-center justify-between mb-6">
-        <input
-          type="text"
-          placeholder="Search by title, skills, or location"
-          value={searchTerm}
-          onChange={handleSearch}
-          className="border border-gray-300 rounded p-2 w-1/2"
-        />
-        <select
-          value={sortOption}
-          onChange={handleSort}
-          className="border border-gray-300 rounded p-2"
-        >
-          <option value="job_title">Sort by Title</option>
-          <option value="min_salary">Sort by Min Salary</option>
-          <option value="max_salary">Sort by Max Salary</option>
-          <option value="location">Sort by Location</option>
-        </select>
-      </div>
+    <div className="h-screen flex flex-col hide-scrollbar scroll-section">
+      {/* Fixed Navbar */}
+      <nav className="px-4 py-3 flex justify-between items-center bg-white shadow z-10">
+        <div>
+          <Select>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Sort by</SelectLabel>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="hidden">Hidden</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Input type="search" placeholder="Search.." />
+        </div>
+        <Button variant="default" onClick={rightState}>
+          Add New
+        </Button>
+      </nav>
 
-      {/* Job Cards in Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-auto">
-        {filteredJobs.map((job) => (
+      {/* Content Area */}
+      <div className="flex flex-grow gap-2">
+        {/* Left Column */}
+        <div className="bg-white w-2/4 p-4  hide-scrollbar scroll-section ">
           <JobCard
-            key={job.id}
-            job={job}
-            onDelete={handleDelete}
-            onHide={handleHide}
+            job_title="Data Scientist"
+            job_role="Machine Learning Engineer"
+            min_salary={80000}
+            max_salary={120000}
+            job_level="Senior"
+            location="San Francisco"
+            city="CA"
+            hidden={false}
           />
-        ))}
+          <JobCard
+            job_title="Product Manager"
+            job_role="Product Owner"
+            min_salary={95000}
+            max_salary={140000}
+            job_level="Lead"
+            location="Austin"
+            city="TX"
+            hidden={true}
+            
+          />
+           <JobCard
+            job_title="Product Manager"
+            job_role="Product Owner"
+            min_salary={95000}
+            max_salary={140000}
+            job_level="Lead"
+            location="Austin"
+            city="TX"
+            hidden={true}
+            
+          />
+           <JobCard
+            job_title="Product Manager"
+            job_role="Product Owner"
+            min_salary={95000}
+            max_salary={140000}
+            job_level="Lead"
+            location="Austin"
+            city="TX"
+            hidden={true}
+            
+          />
+           <JobCard
+            job_title="Product Manager"
+            job_role="Product Owner"
+            min_salary={95000}
+            max_salary={140000}
+            job_level="Lead"
+            location="Austin"
+            city="TX"
+            hidden={true}
+            
+          />
+           <JobCard
+            job_title="Product Manager"
+            job_role="Product Owner"
+            min_salary={95000}
+            max_salary={140000}
+            job_level="Lead"
+            location="Austin"
+            city="TX"
+            hidden={true}
+            
+          />
+           <JobCard
+            job_title="Product Manager"
+            job_role="Product Owner"
+            min_salary={95000}
+            max_salary={140000}
+            job_level="Lead"
+            location="Austin"
+            city="TX"
+            hidden={true}
+            
+          />
+           
+        </div>
+
+        {/* Right Column */}
+        <div className="bg-white w-3/4 p-4 hide-scrollbar scroll-section">
+          {rightCard ? (
+            <h2 className="font-bold mb-4">Right Content</h2>
+          ) : (
+            <JobForm />
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-export default JobList
+export default JobPage;

@@ -1,0 +1,17 @@
+/* Hide scrollbar but allow scrolling */
+.hide-scrollbar {
+    overflow-y: auto; /* Enable vertical scrolling */
+    scrollbar-width: none; /* Hide scrollbar in Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Hide scrollbar in Chrome, Safari, and Edge */
+  }
+  
+  /* Ensure the full height for scrollable sections */
+  .scroll-section {
+    height: calc(100vh - 4rem); /* Adjust based on nav height (4rem = 64px) */
+    overflow-y: auto;
+  }
+  

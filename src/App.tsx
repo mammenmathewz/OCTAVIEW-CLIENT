@@ -11,8 +11,9 @@ import Settings from "./pages/user/Settings";
 import AdminDash from "./pages/admin/AdminDash";
 import AdminLogin from "./pages/admin/Login";
 import ProtectedRoute from "./utils/ProtectedRoutes";
-import JobList from "./pages/user/JobList";
+
 import DashboardOverview from "./components/user/Console/DashboardOverview"; // Your default dashboard component
+import JobPage from "./pages/user/JobList";
 
 function App() {
   return (
@@ -31,7 +32,7 @@ function App() {
             <Route path="candidates" element={<CandidateList />} />
             <Route path="selected-candidates" element={<SelectedCandidates />} />
             <Route path="scheduled-iterviews" element={<ScheduledCandidates />} />
-            <Route path="jobs" element={<JobList />} />
+            <Route path="jobs" element={<JobPage/>} />
             <Route path="settings" element={<Settings />} />
           </Route>
         </Route>
