@@ -4,7 +4,7 @@ import axiosInstance from "../axios/axios";
 
 export const loginUser = async (credentials: { email: string; password: string }): Promise<any> => {
   try {
-    const response = await axiosInstance.post('/login', credentials); 
+    const response = await axiosInstance.post('/user/login', credentials); 
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -20,7 +20,7 @@ export const loginUser = async (credentials: { email: string; password: string }
 
 export const signupUser = async (credentials:SignupCredentials):Promise<any>=>{
   try {
-    const response = await axiosInstance.post('/signup',credentials)
+    const response = await axiosInstance.post('/user/signup',credentials)
     return response.data
   }  catch (error) {
     if (axios.isAxiosError(error)) {
@@ -35,7 +35,7 @@ export const signupUser = async (credentials:SignupCredentials):Promise<any>=>{
 
 export const generateOtp = async (email:string)=>{
   try {
-    const response = await axiosInstance.post('/generate_otp',{email})
+    const response = await axiosInstance.post('/user/generate_otp',{email})
     return response
   }  catch (error) {
     if (axios.isAxiosError(error)) {
@@ -50,8 +50,8 @@ export const generateOtp = async (email:string)=>{
 
 export const verify = async (email: string, otp: string) => {
   try {
-    console.log("OTP in verify:", otp); // Log OTP in verify function
-    const response = await axiosInstance.post('/verify_otp', { email, otp });
+    console.log("OTP in verify:", otp); 
+    const response = await axiosInstance.post('/user/verify_otp', { email, otp });
     return response;
   }  catch (error) {
     if (axios.isAxiosError(error)) {

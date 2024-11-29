@@ -5,6 +5,11 @@ import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import { Checkbox } from "../../ui/checkbox";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../../ui/select";
+import { useSelector } from "react-redux";
+import { selectUserId } from "../../../service/redux/store";
+import { useMutation } from "@tanstack/react-query";
+import { submitJob } from "../../../service/Api/jobApis";
+import { useToast } from "../../../@/hooks/use-toast";
 
 const JobForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +24,39 @@ const JobForm: React.FC = () => {
     city: "",
     description: "",
     hidden: false,
+  });
+  const userId = useSelector(selectUserId)
+  const {toast} = useToast()
+
+  const {mutate,isPending, isError, error, data} = useMutation({
+    mutationFn: (jobData: any) => submitJob(jobData,userId),
+    onSuccess: (data: any) => {
+      console.log("Job submitted successfully:", data);
+      toast({
+        variant:'default',
+        description:data.message
+      })
+      setFormData({
+        job_title: "",
+        skills: "",
+        job_role: "",
+        jobType: "",
+        min_salary: 0,
+        max_salary: 0,
+        job_level: "",
+        location: "",
+        city: "",
+        description: "",
+        hidden: false,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        description: error.message || "An error occurred while submitting the job.",
+      });
+      console.error("Error submitting job:", error);
+    },
   });
 
   const handleChange = (
@@ -47,8 +85,12 @@ const JobForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const jobData = {
+      ...formData,
+      userId, 
+    };
+    mutate(jobData);
     console.log("Submitted Data:", formData);
-    alert("Job submitted successfully!");
     setFormData({
       job_title: "",
       skills: "",
@@ -206,7 +248,7 @@ const JobForm: React.FC = () => {
           onChange={handleChange}
           placeholder="Enter job description"
           className="mt-2 w-full rounded-md border border-neutral-300 p-2 text-sm"
-          rows={5} // Increased height
+          rows={5} 
         />
       </div>
 
