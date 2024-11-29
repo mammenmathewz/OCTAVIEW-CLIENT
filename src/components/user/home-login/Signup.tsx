@@ -167,10 +167,22 @@ export function SignupForm() {
   
   const { mutate, isPending, isError, error, data } = useMutation<any, Error, SignupCredentials>({
     mutationFn: (credentials) => signupUser(credentials),
-    onSuccess:  (data) => {
-       dispatch(login(data.token));
-      console.log("Signup successful", data);
-      navigate('/dash/candidates',{replace:true});
+    onSuccess: (data) => {
+      // Assuming data contains token and user info
+      const { token, user } = data;
+  
+      // Dispatch login action with token, user ID, and company name
+      dispatch(
+        login({
+          accessToken: token,
+          userId: user.id,
+          companyName: user.companyName,
+        })
+      );
+  
+      // Log success and navigate to the candidates dashboard
+      console.log("Signup successful:", data);
+      navigate("/dash", { replace: true });
     },
     onError: (error) => {
       if ((error as any).response?.data?.error) {

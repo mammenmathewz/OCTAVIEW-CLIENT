@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import "../../components/Styles/Scroll.css"; // Ensure this path is correct
+import  { useState } from "react";
+import "../../components/Styles/Scroll.css"; 
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
