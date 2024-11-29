@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 
-import { Input } from '../../ui/input';
+import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
-import { Checkbox } from '../../ui/checkbox';
+import { Checkbox } from "../../ui/checkbox";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../../ui/select";
 
 const JobForm: React.FC = () => {
   const [formData, setFormData] = useState({
     job_title: "",
     skills: "",
     job_role: "",
+    jobType: "",
     min_salary: 0,
     max_salary: 0,
     job_level: "",
@@ -36,6 +38,13 @@ const JobForm: React.FC = () => {
     }));
   };
 
+  const handleJobTypeChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      jobType: value,
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitted Data:", formData);
@@ -44,6 +53,7 @@ const JobForm: React.FC = () => {
       job_title: "",
       skills: "",
       job_role: "",
+      jobType: "",
       min_salary: 0,
       max_salary: 0,
       job_level: "",
@@ -97,7 +107,40 @@ const JobForm: React.FC = () => {
             required
           />
         </div>
+        <div>
+          <Label htmlFor="jobType">Job Type</Label>
+          <Select
+            value={formData.jobType}
+            onValueChange={handleJobTypeChange}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select job type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Job Type</SelectLabel>
+                <SelectItem value="onsite">Onsite</SelectItem>
+                <SelectItem value="remote">Remote</SelectItem>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="city">City</Label>
+          <Input
+            id="city"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+            placeholder="Enter city"
+            className="mt-2 w-full"
+            required
+          />
+        </div>
         <div>
           <Label htmlFor="location">Location</Label>
           <Input
@@ -110,19 +153,6 @@ const JobForm: React.FC = () => {
             required
           />
         </div>
-      </div>
-
-      <div>
-        <Label htmlFor="city">City</Label>
-        <Input
-          id="city"
-          name="city"
-          value={formData.city}
-          onChange={handleChange}
-          placeholder="Enter city"
-          className="mt-2 w-full"
-          required
-        />
       </div>
 
       <div>
