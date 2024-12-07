@@ -1,5 +1,5 @@
-import  { useState } from "react";
-import "../../components/Styles/Scroll.css"; 
+import { useRef, useState, useEffect } from "react";
+import "../../components/Styles/Scroll.css";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -13,14 +13,52 @@ import {
 } from "../../components/ui/select";
 import JobForm from "../../components/user/Console/JobForm";
 import JobCard from "../../components/user/Console/JobCard";
+import { useSelector } from "react-redux";
+import { selectUserId } from "../../service/redux/store";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { fetchJobs } from "../../service/Api/jobApis";
+
 
 function JobPage() {
-  const [leftCards, setLeftCards] = useState<string[]>([]);
   const [rightCard, setRightCard] = useState(true);
+  const userId = useSelector(selectUserId);
+  const observerRef = useRef<HTMLDivElement | null>(null);
 
-  const rightState = () => {
-    setRightCard(false);
-  };
+  const {
+    data,
+    error,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ['jobs', userId],
+    queryFn: ({ pageParam = 1 }) => fetchJobs({ pageParam, userId }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasMore ? lastPage.nextPage : undefined;
+  },  
+  });
+  
+
+  // Observer for Infinite Scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();  // Fetch next page
+        }
+      },
+      { threshold: 1.0 }
+    );
+  
+    if (observerRef.current) observer.observe(observerRef.current);
+  
+    return () => observer.disconnect();
+  }, [hasNextPage, fetchNextPage, isFetchingNextPage]);  // Add isFetchingNextPage to avoid multiple requests
+  console.log('data : ',data);
+  
 
   return (
     <div className="h-screen flex flex-col hide-scrollbar scroll-section">
@@ -43,7 +81,7 @@ function JobPage() {
         <div>
           <Input type="search" placeholder="Search.." />
         </div>
-        <Button variant="default" onClick={rightState}>
+        <Button variant="default" onClick={()=>setRightCard(false)}>
           Add New
         </Button>
       </nav>
@@ -51,84 +89,29 @@ function JobPage() {
       {/* Content Area */}
       <div className="flex flex-grow gap-2">
         {/* Left Column */}
-        <div className="bg-white w-2/4 p-4  hide-scrollbar scroll-section ">
-          <JobCard
-            job_title="Data Scientist"
-            job_role="Machine Learning Engineer"
-            min_salary={80000}
-            max_salary={120000}
-            job_level="Senior"
-            location="San Francisco"
-            city="CA"
-            hidden={false}
-          />
-          <JobCard
-            job_title="Product Manager"
-            job_role="Product Owner"
-            min_salary={95000}
-            max_salary={140000}
-            job_level="Lead"
-            location="Austin"
-            city="TX"
-            hidden={true}
-            
-          />
-           <JobCard
-            job_title="Product Manager"
-            job_role="Product Owner"
-            min_salary={95000}
-            max_salary={140000}
-            job_level="Lead"
-            location="Austin"
-            city="TX"
-            hidden={true}
-            
-          />
-           <JobCard
-            job_title="Product Manager"
-            job_role="Product Owner"
-            min_salary={95000}
-            max_salary={140000}
-            job_level="Lead"
-            location="Austin"
-            city="TX"
-            hidden={true}
-            
-          />
-           <JobCard
-            job_title="Product Manager"
-            job_role="Product Owner"
-            min_salary={95000}
-            max_salary={140000}
-            job_level="Lead"
-            location="Austin"
-            city="TX"
-            hidden={true}
-            
-          />
-           <JobCard
-            job_title="Product Manager"
-            job_role="Product Owner"
-            min_salary={95000}
-            max_salary={140000}
-            job_level="Lead"
-            location="Austin"
-            city="TX"
-            hidden={true}
-            
-          />
-           <JobCard
-            job_title="Product Manager"
-            job_role="Product Owner"
-            min_salary={95000}
-            max_salary={140000}
-            job_level="Lead"
-            location="Austin"
-            city="TX"
-            hidden={true}
-            
-          />
-           
+        <div className="bg-white w-2/4 p-4 hide-scrollbar scroll-section">
+          {isLoading ? (
+            <p>Loading jobs...</p>
+          ) : (
+            data?.pages.map((page) =>
+              page.jobs.map((job: any) => (
+                <JobCard
+                  key={job.id}
+                  job_title={job.job_title}
+                  job_role={job.job_role}
+                  min_salary={job.min_salary}
+                  max_salary={job.max_salary}
+                  job_level={job.job_level}
+                  location={job.location}
+                  city={job.city}
+                  hidden={job.hidden}
+                />
+              ))
+            )
+          )}
+          <div ref={observerRef}>
+            {isFetchingNextPage && <p>Loading more...</p>}
+          </div>
         </div>
 
         {/* Right Column */}
@@ -145,3 +128,7 @@ function JobPage() {
 }
 
 export default JobPage;
+
+
+
+
