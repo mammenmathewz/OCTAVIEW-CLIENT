@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../../components/Styles/Scroll.css";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -20,8 +20,9 @@ import { fetchJobs } from "../../service/Api/jobApis";
 import JobDetail from "../../components/user/Console/JobDetail";
 
 function JobPage() {
-  const [rightCard, setRightCard] = useState(false); // Default to detail view
-  const [selectedJob, setSelectedJob] = useState<any | null>(null);
+  const [selectedJob, setSelectedJob] = useState<any>(null); // Manage the selected job for editing or viewing
+  const [isFormVisible, setIsFormVisible] = useState(false); // Controls whether to show JobForm or JobDetail
+
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,7 +33,6 @@ function JobPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    status,
   } = useInfiniteQuery({
     queryKey: ['jobs', userId],
     queryFn: ({ pageParam = 1 }) => fetchJobs({ pageParam, userId }),
@@ -42,15 +42,7 @@ function JobPage() {
     },
   });
 
-  // Set the first job as the default selectedJob
-  useEffect(() => {
-    if (data?.pages?.[0]?.jobs?.[0] && !selectedJob) {
-      setSelectedJob({ ...data.pages[0].jobs[0] });
-      setRightCard(false); // Show job detail view by default
-    }
-  }, [data, selectedJob]);
-
-  // Observer for Infinite Scroll
+  // Infinite Scroll Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -67,17 +59,19 @@ function JobPage() {
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   const handleCardClick = (job: any) => {
-    console.log("Job clicked:", job); // Check if this prints the correct job
-    setSelectedJob({ ...job }); // Ensure a new object is set
-    setRightCard(false); // Switch to job detail view
+    setSelectedJob(job); 
+    setIsFormVisible(false); 
   };
 
   const handleCancelEdit = () => {
-    setRightCard(true); // Hide the detail view when editing is canceled
-    setSelectedJob(null); // Clear selected job
+    setIsFormVisible(false); 
+    setSelectedJob(null); // Reset selected job
   };
 
-  console.log("Selected Job: ", selectedJob); // Check the selectedJob state
+  const handleAddNew = () => {
+    setSelectedJob(null); // No selected job for adding a new job
+    setIsFormVisible(true); // Show the JobForm to add a new job
+  };
 
   return (
     <div className="h-screen flex flex-col hide-scrollbar scroll-section">
@@ -100,7 +94,7 @@ function JobPage() {
         <div>
           <Input type="search" placeholder="Search.." />
         </div>
-        <Button variant="default" onClick={() => setRightCard(false)}>
+        <Button variant="default" onClick={handleAddNew}>
           Add New
         </Button>
       </nav>
@@ -136,13 +130,13 @@ function JobPage() {
 
         {/* Right Column */}
         <div className="bg-white w-3/4 p-4 hide-scrollbar scroll-section">
-          {rightCard ? (
-            <JobForm /> // Show JobForm when rightCard is true (for adding new job)
+          {isFormVisible ? (
+            <JobForm /> // Show JobForm when adding a new job
           ) : (
             selectedJob && (
               <JobDetail
-                job={selectedJob}
-                onCancel={handleCancelEdit}
+                job={selectedJob} // Pass selected job to JobDetail for editing/viewing
+                onCancel={handleCancelEdit} // Allow canceling the edit
               />
             )
           )}

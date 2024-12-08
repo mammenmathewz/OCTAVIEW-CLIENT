@@ -12,19 +12,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+  } from "../../ui/alert-dialog"
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteJob, editJob } from "../../../service/Api/jobApis";
+import { useToast } from "../../../@/hooks/use-toast";
+import { useSelector } from "react-redux";
+import { selectUserId } from "../../../service/redux/store";
+
 
 interface JobDetailProps {
-  job: any; // Job data passed as a prop
-  onCancel: () => void; // Callback to handle canceling the edit
+  job: any; 
+  onCancel: () => void; 
 }
 
 const JobDetail: React.FC<JobDetailProps> = ({ job, onCancel }) => {
   const [formData, setFormData] = useState<any>({ ...job });
   const [editMode, setEditMode] = useState(false);
-
+  const queryClient = useQueryClient()
+  const {toast} = useToast()
+  const userId = useSelector(selectUserId)
+  
   useEffect(() => {
     if (JSON.stringify(formData) !== JSON.stringify(job)) {
-      setFormData({ ...job }); // Update state only if the job data has changed
+      setFormData({ ...job }); 
     }
   }, [job]);
 
@@ -43,17 +63,66 @@ const JobDetail: React.FC<JobDetailProps> = ({ job, onCancel }) => {
     }));
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteJob,
+    onSuccess:()=>{
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      toast({
+        title: "Job deleted ",
+        description: "You can undo this action.",
+      })
+    },
+    onError:(error:Error)=>{
+      toast({
+        description:`Failed to delete: ${error.message}`
+      })
+    }
+  })
+
+  const editMutation = useMutation({
+    mutationFn: editJob,
+    onSuccess:()=>{
+      queryClient.invalidateQueries({queryKey:['jobs']})
+      setEditMode(false);
+      toast({
+        title:'Job Updated',
+      })
+    },
+    onError:(error:Error)=>{
+      toast({
+        description:`Failed to complete: ${error.message}`
+      })
+    }
+  })
+  const handleDelete = ()=>{
+    console.log(job.id);
+    deleteMutation.mutate({ jobId:job.id,userId})
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.min_salary > formData.max_salary) {
-      alert("Min salary cannot be greater than Max salary!");
+    if (!formData.job_title || !formData.job_role || !formData.skills) {
+      toast({
+        description: "Please complete all required fields.",
+      });
       return;
     }
-    setEditMode(false); // Exit edit mode
+    if (formData.min_salary > formData.max_salary) {
+      toast({
+        description: "Max salary should be greater than min salary.",
+      });
+      return;
+    }
+    editMutation.mutate({
+      jobId: job.id,
+      userId: userId,
+      updatedData: { ...formData },
+    });
   };
+  
 
   const handleCancelEdit = () => {
-    setFormData({ ...job }); // Reset the form data to initial job
+    setFormData({ ...job });
     onCancel();
     setEditMode(false); // Exit edit mode
   };
@@ -217,7 +286,7 @@ const JobDetail: React.FC<JobDetailProps> = ({ job, onCancel }) => {
           <Button type="submit" className="w-full" variant='outline'>
             Save
           </Button>
-          <Button type="button" className="w-full mt-2" variant="destructive" onClick={handleCancelEdit}>
+          <Button type="button" className="w-full mt-2" variant="default" onClick={handleCancelEdit}>
             Cancel
           </Button>
         </form>
@@ -233,14 +302,25 @@ const JobDetail: React.FC<JobDetailProps> = ({ job, onCancel }) => {
           >
             Edit
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => console.log('Delete clicked')} // Replace with delete logic
-            className="px-4"
-          >
-            Delete
-          </Button>
+          <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive">Delete</Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete your
+            account and remove your data from our servers.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
         </div>
       
         {/* Job Details */}

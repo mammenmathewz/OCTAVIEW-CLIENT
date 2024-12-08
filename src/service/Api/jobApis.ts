@@ -26,8 +26,6 @@ export const fetchJobs = async ({
         page: pageParam,  
       },
     });
-    console.log("res jobs:",response.data.jobs);
-    
     return {
       jobs: response.data.jobs,  // Assuming the response contains an array of jobs
       hasMore: response.data.hasMore,  // Assuming the response indicates if there are more jobs
@@ -44,4 +42,42 @@ export const fetchJobs = async ({
   }
 };
 
+export const deleteJob = async({jobId,userId}:{jobId:string;userId:UserId}):Promise<void>=>{
+  try {
+    await axiosInstance.delete(`/jobs/${userId}/${jobId}`)
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const backendError =
+        error.response?.data?.error || "Failed to delete the job";
+      throw new Error(backendError);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+}
 
+export const editJob = async ({
+  jobId,
+  userId,
+  updatedData,
+}: {
+  jobId: string;
+  userId: UserId;
+  updatedData: Partial<Job>;
+}): Promise<Job> => {
+  try {
+    const response = await axiosInstance.put(
+      `/jobs/${userId}/${jobId}`,
+      updatedData
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const backendError =
+        error.response?.data?.error || "Failed to update the job";
+      throw new Error(backendError);
+    } else {
+      throw new Error("An unexpected error occurred");
+    }
+  }
+};

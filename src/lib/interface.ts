@@ -16,7 +16,6 @@ export interface SignupCredentials {
     hidden: boolean;
   }
   
-  // Type for the API response
   export interface JobsApiResponse {
     nextCursor: any;
     jobs: Job[];
