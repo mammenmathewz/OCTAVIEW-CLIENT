@@ -27,8 +27,8 @@ export const fetchJobs = async ({
       },
     });
     return {
-      jobs: response.data.jobs,  // Assuming the response contains an array of jobs
-      hasMore: response.data.hasMore,  // Assuming the response indicates if there are more jobs
+      jobs: response.data.jobs,  
+      hasMore: response.data.hasMore, 
       nextPage: response.data.nextPage,  // Assuming the response includes the nextPage cursor or null if no more pages
     };
   } catch (error) {
@@ -44,7 +44,7 @@ export const fetchJobs = async ({
 
 export const deleteJob = async({jobId,userId}:{jobId:string;userId:UserId}):Promise<void>=>{
   try {
-    await axiosInstance.delete(`/jobs/${userId}/${jobId}`)
+    await axiosInstance.delete(`/jobs/${jobId}/${userId}`)
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const backendError =
@@ -67,7 +67,7 @@ export const editJob = async ({
 }): Promise<Job> => {
   try {
     const response = await axiosInstance.put(
-      `/jobs/${userId}/${jobId}`,
+      `/jobs/${jobId}/${userId}`,
       updatedData
     );
     return response.data;

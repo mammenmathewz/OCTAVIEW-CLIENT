@@ -7,7 +7,7 @@ import { Checkbox } from "../../ui/checkbox";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../../ui/select";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../../../service/redux/store";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { submitJob } from "../../../service/Api/jobApis";
 import { useToast } from "../../../@/hooks/use-toast";
 
@@ -27,11 +27,12 @@ const JobForm: React.FC = () => {
   });
   const userId = useSelector(selectUserId)
   const {toast} = useToast()
+  const queryClient = useQueryClient()
 
   const {mutate,isPending, isError, error, data} = useMutation({
     mutationFn: (jobData: any) => submitJob(jobData,userId),
     onSuccess: (data: any) => {
-      console.log("Job submitted successfully:", data);
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
       toast({
         variant:'default',
         description:data.message
@@ -89,6 +90,12 @@ const JobForm: React.FC = () => {
       ...formData,
       userId, 
     };
+    if (formData.min_salary > formData.max_salary) {
+      toast({
+        description: "Max salary should be greater than min salary.",
+      });
+      return;
+    }
     mutate(jobData);
     console.log("Submitted Data:", formData);
     setFormData({

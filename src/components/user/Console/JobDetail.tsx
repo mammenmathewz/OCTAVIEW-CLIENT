@@ -68,13 +68,13 @@ const JobDetail: React.FC<JobDetailProps> = ({ job, onCancel }) => {
     onSuccess:()=>{
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
       toast({
-        title: "Job deleted ",
-        description: "You can undo this action.",
+        title: "Job deleted "
       })
     },
     onError:(error:Error)=>{
       toast({
-        description:`Failed to delete: ${error.message}`
+        variant:'destructive',
+        description:`Failed : ${error.message}`
       })
     }
   })
@@ -90,7 +90,8 @@ const JobDetail: React.FC<JobDetailProps> = ({ job, onCancel }) => {
     },
     onError:(error:Error)=>{
       toast({
-        description:`Failed to complete: ${error.message}`
+        variant:'destructive',
+        description:`Failed: ${error.message}`
       })
     }
   })
