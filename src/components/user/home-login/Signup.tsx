@@ -32,27 +32,27 @@ export function SignupForm() {
   const validate = (value: string) => {
     const errors: string[] = [];
 
-    if (!validator.isLength(value, { min: 6 })) {
-      errors.push('Password must be at least 6 characters long');
-    }
-    if (!/[a-z]/.test(value)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-    if (!/[A-Z]/.test(value)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-    if (!/[0-9]/.test(value)) {
-      errors.push('Password must contain at least one number');
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-      errors.push('Password must contain at least one special character');
-    }
+    // if (!validator.isLength(value, { min: 6 })) {
+    //   errors.push('Password must be at least 6 characters long');
+    // }
+    // if (!/[a-z]/.test(value)) {
+    //   errors.push('Password must contain at least one lowercase letter');
+    // }
+    // if (!/[A-Z]/.test(value)) {
+    //   errors.push('Password must contain at least one uppercase letter');
+    // }
+    // if (!/[0-9]/.test(value)) {
+    //   errors.push('Password must contain at least one number');
+    // }
+    // if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+    //   errors.push('Password must contain at least one special character');
+    // }
 
-    if (errors.length === 0) {
-      setErrorMessages(['']);
-    } else {
-      setErrorMessages(errors);
-    }
+    // if (errors.length === 0) {
+    //   setErrorMessages(['']);
+    // } else {
+    //   setErrorMessages(errors);
+    // }
   };
 
   const handleFocus = () => {

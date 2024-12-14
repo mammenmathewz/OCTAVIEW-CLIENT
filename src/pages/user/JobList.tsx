@@ -11,13 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import JobForm from "../../components/user/Console/JobForm";
-import JobCard from "../../components/user/Console/JobCard";
+import JobForm from "../../components/user/Job/JobForm";
+import JobCard from "../../components/user/Job/JobCard";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../../service/redux/store";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchJobs } from "../../service/Api/jobApis";
-import JobDetail from "../../components/user/Console/JobDetail";
+import JobDetail from "../../components/user/Job/JobDetail";
 
 function JobPage() {
   const [selectedJob, setSelectedJob] = useState<any>(null);
