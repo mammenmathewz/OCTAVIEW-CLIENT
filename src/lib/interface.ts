@@ -22,3 +22,18 @@ export interface SignupCredentials {
     hasMore: boolean;
     nextPage: number;
   }
+  export interface Candidate {
+    id: string;              
+    fullName: string;        
+    email: string;           
+    phone: string;          
+    location: string;        
+    experience: string;     
+    status: string;          
+    jobId: string;           
+    appliedDate: string;    
+    resumeUrl?: string;      
+    linkedinUrl?: string;    
+    githubUrl?: string;      
+  }
+  

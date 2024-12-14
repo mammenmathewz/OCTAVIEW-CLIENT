@@ -13,19 +13,40 @@ import {
 import JobCard from "../../components/user/Job/JobCard";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../../service/redux/store";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchJobs } from "../../service/Api/jobApis";
+import { fetchCandidatesByJob } from "../../service/Api/candidateApi";
 import CandidateCard from "../../components/user/Candidate/CandidateCard";
 
+type Job = {
+  id: string;
+  job_title: string;
+  job_role: string;
+  min_salary: number;
+  max_salary: number;
+  job_level: string;
+  location: string;
+  city: string;
+  hidden: boolean;
+};
 
+type Candidate = {
+  id: string;
+  fullName: string;
+  email: string;
+  contactNo: string;
+  jobRole: string;
+  experience: string;
+  location: string;
+  status: string;
+};
 
 function CandidateList() {
-  const [selectedJob, setSelectedJob] = useState<any>(null);
-  const [isFormVisible, setIsFormVisible] = useState(false);
-
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the "observer" element
 
+  // Fetching jobs with pagination
   const {
     data,
     error,
@@ -41,6 +62,32 @@ function CandidateList() {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
     },
   });
+
+  const { 
+    data: candidatesData, 
+    error: candidatesError, 
+    isLoading: isCandidatesLoading 
+  } = useQuery({
+    queryKey: ["candidates", selectedJob?.id, userId],
+    queryFn: async () => {
+      if (!selectedJob?.id) {
+        throw new Error("Job ID is required");
+      }
+      const response = await fetchCandidatesByJob({ jobId: selectedJob.id });
+      console.log('Fetched candidates:', response); // Log the response here
+      
+      // Ensure you return a valid data structure, candidates array or empty array
+      return response?.candidates || []; // Return an empty array if no candidates
+    },
+    enabled: !!selectedJob?.id, // Only run when selectedJob?.id is available
+    refetchOnWindowFocus: false,
+  });
+  
+  
+
+  useEffect(() => {
+    console.log('Candidates Data:', candidatesData); // Add this line to check the data
+  }, [candidatesData]);
 
   useEffect(() => {
     if (!observerRef.current) return;
@@ -64,19 +111,8 @@ function CandidateList() {
     return () => observer.disconnect(); // Clean up on unmount
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  const handleCardClick = (job: any) => {
-    setSelectedJob(job);
-    setIsFormVisible(false);
-  };
-
-  const handleCancelEdit = () => {
-    setIsFormVisible(false);
-    setSelectedJob(null);
-  };
-
-  const handleAddNew = () => {
-    setSelectedJob(null);
-    setIsFormVisible(true);
+  const handleCardClick = (job: Job) => {
+    setSelectedJob(job); // Set selected job when a job card is clicked
   };
 
   return (
@@ -99,29 +135,10 @@ function CandidateList() {
         <div>
           <Input type="search" placeholder="Search.." />
         </div>
-        
-          <div>
-            <Select>
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Sort by</SelectLabel>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="hidden">Hidden</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Input type="search" placeholder="Search.." />
-          </div>
-        
       </nav>
 
       <div className="flex flex-grow gap-2">
-        {/* Left Column */}
+        {/* Left Column - Jobs List */}
         <div className="bg-white w-2/4 p-4 hide-scrollbar scroll-section">
           {isLoading ? (
             <p>Loading jobs...</p>
@@ -129,7 +146,7 @@ function CandidateList() {
             <p>Error loading jobs.</p>
           ) : (
             data?.pages.map((page) =>
-              page.jobs.map((job: any) => (
+              page.jobs.map((job: Job) => (
                 <JobCard
                   key={job.id}
                   job_title={job.job_title}
@@ -140,7 +157,7 @@ function CandidateList() {
                   location={job.location}
                   city={job.city}
                   hidden={job.hidden}
-                  onClick={() => handleCardClick(job)}
+                  onClick={() => handleCardClick(job)} // Trigger the fetch for candidates
                 />
               ))
             )
@@ -150,13 +167,33 @@ function CandidateList() {
           </div>
         </div>
 
-        {/* Right Column */}
+        {/* Right Column - Show Candidates */}
         <div className="bg-white w-3/4 p-4 hide-scrollbar scroll-section">
-            <CandidateCard name={""} email={""} phone={""} role={""} experience={""} location={""} status={""}/>
+        {isCandidatesLoading ? (
+  <p>Loading candidates...</p>
+) : candidatesError ? (
+  <p>Error loading candidates.</p>
+) : candidatesData?.length === 0 ? (
+  <p>No candidates available for this job.</p>
+) : (
+  candidatesData?.map((candidate: Candidate) => (
+    <CandidateCard
+      key={candidate.email} // Use email if ID is not available
+      name={candidate.fullName}
+      email={candidate.email}
+      phone={candidate.contactNo}
+      role={candidate.jobRole}
+      experience={candidate.experience}
+      location={candidate.location}
+      status={candidate.status}
+    />
+  ))
+)}
+
         </div>
       </div>
     </div>
   );
 }
 
-export default CandidateList
+export default CandidateList;
