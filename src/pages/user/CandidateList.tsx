@@ -17,6 +17,7 @@ import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { fetchJobs } from "../../service/Api/jobApis";
 import { fetchCandidatesByJob } from "../../service/Api/candidateApi";
 import CandidateCard from "../../components/user/Candidate/CandidateCard";
+import { useNavigate } from "react-router-dom";
 
 type Job = {
   id: string;
@@ -31,13 +32,15 @@ type Job = {
 };
 
 type Candidate = {
+  DOB: any;
+  github: any;
+  linkedin: any;
+  resumeUrl: any;
   id: string;
   fullName: string;
   email: string;
   contactNo: string;
-  jobRole: string;
-  experience: string;
-  location: string;
+  country: string;
   status: string;
 };
 
@@ -45,6 +48,7 @@ function CandidateList() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the "observer" element
+  const navigate = useNavigate()
 
   // Fetching jobs with pagination
   const {
@@ -178,15 +182,31 @@ function CandidateList() {
 ) : (
   candidatesData?.map((candidate: Candidate) => (
     <CandidateCard
-      key={candidate.email} // Use email if ID is not available
-      name={candidate.fullName}
-      email={candidate.email}
-      phone={candidate.contactNo}
-      role={candidate.jobRole}
-      experience={candidate.experience}
-      location={candidate.location}
-      status={candidate.status}
-    />
+    key={candidate.email} // Ensure email is unique
+    name={candidate.fullName}
+    email={candidate.email}
+    phone={candidate.contactNo}
+    country={candidate.country}
+    status={candidate.status}
+    onClick={() =>
+      navigate('/dash/candidate-details', {
+        state: {
+          candidate: {
+            fullName: candidate.fullName,
+            dob: candidate.DOB,
+            contactNo: candidate.contactNo,
+            country: candidate.country,
+            email: candidate.email,
+            github: candidate.github,
+            linkedin: candidate.linkedin,
+            resumeUrl: candidate.resumeUrl,
+          },
+        },
+      })
+    }
+  />
+  
+  
   ))
 )}
 

@@ -14,6 +14,7 @@ import ProtectedRoute from "./utils/ProtectedRoutes";
 
 import DashboardOverview from "./components/user/Console/DashboardOverview"; // Your default dashboard component
 import JobPage from "./pages/user/JobList";
+import CandidateDetails from "./pages/user/CandidateDetails";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             {/* Nested routes for sidebar links */}
             <Route path="candidates" element={<CandidateList />} />
             <Route path="selected-candidates" element={<SelectedCandidates />} />
+            <Route path="candidate-details" element={<CandidateDetails/>} />
             <Route path="scheduled-iterviews" element={<ScheduledCandidates />} />
             <Route path="jobs" element={<JobPage/>} />
             <Route path="settings" element={<Settings />} />
