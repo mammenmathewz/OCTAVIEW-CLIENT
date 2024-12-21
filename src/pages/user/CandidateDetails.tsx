@@ -1,25 +1,91 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { selectCandidate, rejectCandidate } from '../../service/Api/candidateApi';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Separator } from '../../components/ui/separator';
 import {
   ArrowLeft,
+  CheckCircle2,
+  XCircle,
   Calendar,
   Mail,
+  User,
   Phone,
   Globe,
-  Github,
   Linkedin,
-  User,
-  CheckCircle2,
-  XCircle
+  Github,
 } from 'lucide-react';
+import { useToast } from '../../@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../../components/ui/alert-dialog';
 
 const CandidateDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { candidate } = location.state || {};
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isSelectDialogOpen, setSelectDialogOpen] = useState(false);
+
+  const selectMutation = useMutation({
+    mutationFn: selectCandidate,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+      toast({
+        title: 'Candidate Selected',
+        description: `${candidate.fullName} has been selected successfully.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: 'destructive',
+        description: `Failed to select candidate: ${error.message}`,
+      });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: rejectCandidate,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+      toast({
+        title: 'Candidate Rejected',
+        description: `${candidate.fullName} has been rejected.`,
+      });
+      navigate(-1);
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: 'destructive',
+        description: `Failed to reject candidate: ${error.message}`,
+      });
+    },
+  });
+
+  const handleSelect = () => {
+    selectMutation.mutate({ candidateId: candidate.id });
+    setSelectDialogOpen(false); // Close dialog after action
+  };
+
+  const handleReject = () => {
+    rejectMutation.mutate({ candidateId: candidate.id });
+    setDeleteDialogOpen(false); // Close dialog after action
+  };
+
+  const handleBack = () => navigate(-1);
 
   if (!candidate) {
     return (
@@ -28,20 +94,6 @@ const CandidateDetails = () => {
       </div>
     );
   }
-
-  const handleBack = () => {
-    navigate(-1);
-  };
-
-  const handleSelect = () => {
-    // Add your select logic here
-    console.log('Candidate selected:', candidate.fullName);
-  };
-
-  const handleReject = () => {
-    // Add your reject logic here
-    console.log('Candidate rejected:', candidate.fullName);
-  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -150,21 +202,58 @@ const CandidateDetails = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2">
-                  <Button
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                    onClick={handleSelect}
-                  >
-                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                    Select
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={handleReject}
-                  >
-                    <XCircle className="h-4 w-4 mr-1" />
-                    Reject
-                  </Button>
+                  <AlertDialog open={isSelectDialogOpen} onOpenChange={setSelectDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white">
+                        <CheckCircle2 className="h-4 w-4 mr-1" />
+                        Select
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Selection</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to select this candidate?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setSelectDialogOpen(false)}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={handleSelect}>
+                          Confirm
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  
+                  <AlertDialog open={isDeleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Reject
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently reject the candidate and remove them from your list.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={handleReject}>
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardContent>
@@ -174,21 +263,18 @@ const CandidateDetails = () => {
 
       {/* Right Section */}
       <div className="w-9/12 h-screen">
-  {candidate.resumeUrl ? (
-    <div className="h-full pt-0">
-      <iframe
-        src={candidate.resumeUrl}
-        title="Candidate Resume"
-        className="w-full h-screen border rounded-md shadow-md"
-      />
-    </div>
-  ) : (
-    <div className="flex justify-center items-center h-screen">
-      <p className="text-gray-500">No resume available</p>
-    </div>
-  )}
-</div>
-
+        {candidate.resumeUrl ? (
+          <iframe
+            src={candidate.resumeUrl}
+            title="Candidate Resume"
+            className="w-full h-full border rounded-md shadow-md"
+          />
+        ) : (
+          <div className="h-full flex items-center justify-center text-lg text-gray-500">
+            No Resume Available
+          </div>
+        )}
+      </div>
     </div>
   );
 };

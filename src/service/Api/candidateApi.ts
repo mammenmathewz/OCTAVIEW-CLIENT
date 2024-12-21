@@ -25,3 +25,34 @@ export const fetchCandidatesByJob = async ({ jobId }: { jobId: string }) => {
       throw new Error('An unexpected error occurred');
     }
 };
+
+export const selectCandidate = async ({ candidateId }: { candidateId: any }) => {
+ try {
+  const response = await axiosInstance.post(`/candidate/select`, { candidateId });
+  return response.data; 
+ } catch (error) {
+  if (axios.isAxiosError(error)) {
+    console.error('Axios Error:', error.response?.data);
+    throw new Error(error.response?.data?.error || 'An unexpected error occurred');
+  }
+  console.error('Unknown Error:', error);
+  throw new Error('An unexpected error occurred');
+}
+}
+
+// Reject a candidate (delete from candidates)
+export const rejectCandidate = async ({ candidateId }: { candidateId: any }) => {
+  try {
+    console.log("Rejecting candidate with ID:", candidateId);
+    
+    const response = await axiosInstance.delete(`/candidate/${candidateId}`);
+    return response.data;
+  } catch(error){
+    if (axios.isAxiosError(error)) {
+      console.error('Axios Error:', error.response?.data);
+      throw new Error(error.response?.data?.error || 'An unexpected error occurred');
+    }
+    console.error('Unknown Error:', error);
+    throw new Error('An unexpected error occurred');
+  }
+}

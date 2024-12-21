@@ -48,7 +48,7 @@ function CandidateList() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the "observer" element
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Fetching jobs with pagination
   const {
@@ -67,10 +67,10 @@ function CandidateList() {
     },
   });
 
-  const { 
-    data: candidatesData, 
-    error: candidatesError, 
-    isLoading: isCandidatesLoading 
+  const {
+    data: candidatesData,
+    error: candidatesError,
+    isLoading: isCandidatesLoading,
   } = useQuery({
     queryKey: ["candidates", selectedJob?.id, userId],
     queryFn: async () => {
@@ -78,19 +78,17 @@ function CandidateList() {
         throw new Error("Job ID is required");
       }
       const response = await fetchCandidatesByJob({ jobId: selectedJob.id });
-      console.log('Fetched candidates:', response); // Log the response here
-      
+      console.log("Fetched candidates:", response); // Log the response here
+
       // Ensure you return a valid data structure, candidates array or empty array
       return response?.candidates || []; // Return an empty array if no candidates
     },
     enabled: !!selectedJob?.id, // Only run when selectedJob?.id is available
     refetchOnWindowFocus: false,
   });
-  
-  
 
   useEffect(() => {
-    console.log('Candidates Data:', candidatesData); // Add this line to check the data
+    console.log("Candidates Data:", candidatesData); // Add this line to check the data
   }, [candidatesData]);
 
   useEffect(() => {
@@ -173,43 +171,41 @@ function CandidateList() {
 
         {/* Right Column - Show Candidates */}
         <div className="bg-white w-3/4 p-4 hide-scrollbar scroll-section">
-        {isCandidatesLoading ? (
-  <p>Loading candidates...</p>
-) : candidatesError ? (
-  <p>Error loading candidates.</p>
-) : candidatesData?.length === 0 ? (
-  <p>No candidates available for this job.</p>
-) : (
-  candidatesData?.map((candidate: Candidate) => (
-    <CandidateCard
-    key={candidate.email} // Ensure email is unique
-    name={candidate.fullName}
-    email={candidate.email}
-    phone={candidate.contactNo}
-    country={candidate.country}
-    status={candidate.status}
-    onClick={() =>
-      navigate('/dash/candidate-details', {
-        state: {
-          candidate: {
-            fullName: candidate.fullName,
-            dob: candidate.DOB,
-            contactNo: candidate.contactNo,
-            country: candidate.country,
-            email: candidate.email,
-            github: candidate.github,
-            linkedin: candidate.linkedin,
-            resumeUrl: candidate.resumeUrl,
-          },
-        },
-      })
-    }
-  />
-  
-  
-  ))
-)}
-
+          {isCandidatesLoading ? (
+            <p>Loading candidates...</p>
+          ) : candidatesError ? (
+            <p>Error loading candidates.</p>
+          ) : candidatesData?.length === 0 ? (
+            <p>No candidates available for this job.</p>
+          ) : (
+            candidatesData?.map((candidate: Candidate) => (
+              <CandidateCard
+                key={candidate.id}
+                name={candidate.fullName}
+                email={candidate.email}
+                phone={candidate.contactNo}
+                country={candidate.country}
+                status={candidate.status}
+                onClick={() =>
+                  navigate("/dash/candidate-details", {
+                    state: {
+                      candidate: {
+                        id: candidate.id,
+                        fullName: candidate.fullName,
+                        dob: candidate.DOB,
+                        contactNo: candidate.contactNo,
+                        country: candidate.country,
+                        email: candidate.email,
+                        github: candidate.github,
+                        linkedin: candidate.linkedin,
+                        resumeUrl: candidate.resumeUrl,
+                      },
+                    },
+                  })
+                }
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
