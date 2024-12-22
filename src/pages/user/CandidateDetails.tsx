@@ -33,9 +33,10 @@ import {
 const CandidateDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { candidate } = location.state || {};
+  const { candidate,jobId } = location.state || {};
   const queryClient = useQueryClient();
   const { toast } = useToast();
+console.log("Candidate Details",candidate,  "jobid :  : "+jobId);
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isSelectDialogOpen, setSelectDialogOpen] = useState(false);
@@ -76,7 +77,7 @@ const CandidateDetails = () => {
   });
 
   const handleSelect = () => {
-    selectMutation.mutate({ candidateId: candidate.id });
+    selectMutation.mutate({ candidateId: candidate.id, jobId });
     setSelectDialogOpen(false); // Close dialog after action
   };
 

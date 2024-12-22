@@ -1,5 +1,4 @@
 import axiosInstance from "../axios/axios"; // Assuming this is your Axios instance
-import { Candidate } from "../../lib/interface"; // Assuming Candidate interface is defined in your interface file
 import axios from "axios";
 
 // Fetch candidates by job ID
@@ -26,26 +25,26 @@ export const fetchCandidatesByJob = async ({ jobId }: { jobId: string }) => {
     }
 };
 
-export const selectCandidate = async ({ candidateId }: { candidateId: any }) => {
- try {
-  const response = await axiosInstance.post(`/candidate/select`, { candidateId });
-  return response.data; 
- } catch (error) {
-  if (axios.isAxiosError(error)) {
-    console.error('Axios Error:', error.response?.data);
-    throw new Error(error.response?.data?.error || 'An unexpected error occurred');
+export const selectCandidate = async ({ candidateId, jobId }: { candidateId: any; jobId: any }) => {
+  try {
+    const response = await axiosInstance.post(`/selected/`, { candidateId, jobId });
+    return response.data; 
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios Error:', error.response?.data);
+      throw new Error(error.response?.data?.error || 'An unexpected error occurred');
+    }
+    console.error('Unknown Error:', error);
+    throw new Error('An unexpected error occurred');
   }
-  console.error('Unknown Error:', error);
-  throw new Error('An unexpected error occurred');
-}
-}
+};
 
-// Reject a candidate (delete from candidates)
+
 export const rejectCandidate = async ({ candidateId }: { candidateId: any }) => {
   try {
     console.log("Rejecting candidate with ID:", candidateId);
     
-    const response = await axiosInstance.delete(`/candidate/${candidateId}`);
+    const response = await axiosInstance.delete(`/selected/${candidateId}`);
     return response.data;
   } catch(error){
     if (axios.isAxiosError(error)) {

@@ -114,7 +114,7 @@ function CandidateList() {
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   const handleCardClick = (job: Job) => {
-    setSelectedJob(job); // Set selected job when a job card is clicked
+    setSelectedJob(job); 
   };
 
   return (
@@ -180,30 +180,32 @@ function CandidateList() {
           ) : (
             candidatesData?.map((candidate: Candidate) => (
               <CandidateCard
-                key={candidate.id}
-                name={candidate.fullName}
-                email={candidate.email}
-                phone={candidate.contactNo}
-                country={candidate.country}
-                status={candidate.status}
-                onClick={() =>
-                  navigate("/dash/candidate-details", {
-                    state: {
-                      candidate: {
-                        id: candidate.id,
-                        fullName: candidate.fullName,
-                        dob: candidate.DOB,
-                        contactNo: candidate.contactNo,
-                        country: candidate.country,
-                        email: candidate.email,
-                        github: candidate.github,
-                        linkedin: candidate.linkedin,
-                        resumeUrl: candidate.resumeUrl,
-                      },
+              key={candidate.id}
+              name={candidate.fullName}
+              email={candidate.email}
+              phone={candidate.contactNo}
+              country={candidate.country}
+              status={candidate.status}
+              onClick={() =>
+                navigate("/dash/candidate-details", {
+                  state: {
+                    candidate: {
+                      id: candidate.id,
+                      fullName: candidate.fullName,
+                      dob: candidate.DOB,
+                      contactNo: candidate.contactNo,
+                      country: candidate.country,
+                      email: candidate.email,
+                      github: candidate.github,
+                      linkedin: candidate.linkedin,
+                      resumeUrl: candidate.resumeUrl,
                     },
-                  })
-                }
-              />
+                    jobId: selectedJob?.id, // Include the jobId here
+                  },
+                })
+              }
+            />
+            
             ))
           )}
         </div>
