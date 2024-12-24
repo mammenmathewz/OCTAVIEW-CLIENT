@@ -46,7 +46,7 @@ function SelectedCandidates() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["jobs", userId],
+    queryKey: ["SelectedCandidatejobs", userId],
     queryFn: ({ pageParam = 1 }) => fetchJobs({ pageParam, userId }),
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextPage : undefined),
     initialPageParam: 1,
@@ -57,7 +57,7 @@ function SelectedCandidates() {
     error: candidatesError,
     isLoading: isCandidatesLoading,
   } = useQuery({
-    queryKey: ["candidates", selectedJob?.id, userId],
+    queryKey: ["selectedCandidates", selectedJob?.id, userId],
     queryFn: async () => {
       if (!selectedJob?.id) {
         throw new Error("Job ID is required");

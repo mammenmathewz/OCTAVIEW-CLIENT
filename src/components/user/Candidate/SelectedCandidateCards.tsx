@@ -110,8 +110,9 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
             id="time"
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2"
-          />
+            className="w-full border border-gray-300 rounded-md p-2 bg-black text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
         </div>
       </div>
 
