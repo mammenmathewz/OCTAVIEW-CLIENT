@@ -15,7 +15,7 @@ import ProtectedRoute from "./utils/ProtectedRoutes";
 import DashboardOverview from "./components/user/Console/DashboardOverview"; 
 import JobPage from "./pages/user/JobList";
 import CandidateDetails from "./pages/user/CandidateDetails";
-import ErrorBoundary from "./service/Helper/ErrorBoundary";  // Import the ErrorBoundary component
+import ErrorBoundary from "./utils/ErrorBoundary";  // Import the ErrorBoundary component
 
 function App() {
   return (

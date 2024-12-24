@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import { cn } from "../../../lib/utils";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../service/redux/authSlice";
-import ErrorBoundary from "../../../service/Helper/ErrorBoundary";
+import ErrorBoundary from "../../../utils/ErrorBoundary";
 
 // SidebarDash.tsx
 interface Links {
