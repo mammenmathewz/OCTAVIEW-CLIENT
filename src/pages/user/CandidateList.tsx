@@ -48,7 +48,7 @@ function CandidateList() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the "observer" element
-  const navigate = useNavigate();
+  const navigate = useNavigate();  
 
   // Fetching jobs with pagination
   const {
@@ -73,23 +73,16 @@ function CandidateList() {
     isLoading: isCandidatesLoading,
   } = useQuery({
     queryKey: ["candidates", selectedJob?.id, userId],
-    queryFn: async () => {
-      if (!selectedJob?.id) {
-        throw new Error("Job ID is required");
+    queryFn: () => {
+      if (selectedJob) {
+        return fetchCandidatesByJob(selectedJob.id);
       }
-      const response = await fetchCandidatesByJob({ jobId: selectedJob.id });
-      console.log("Fetched candidates:", response); // Log the response here
-
-      // Ensure you return a valid data structure, candidates array or empty array
-      return response?.candidates || []; // Return an empty array if no candidates
+      return []; // Return an empty array if selectedJob is null
     },
     enabled: !!selectedJob?.id, // Only run when selectedJob?.id is available
     refetchOnWindowFocus: false,
   });
-
-  useEffect(() => {
-    console.log("Candidates Data:", candidatesData); // Add this line to check the data
-  }, [candidatesData]);
+  
 
   useEffect(() => {
     if (!observerRef.current) return;

@@ -1,5 +1,4 @@
-// SidebarDash.tsx
-"use client";
+
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../../ui/sideBar";
 import {
@@ -8,11 +7,12 @@ import {
   IconSettings,
   IconUserBolt,
 } from "@tabler/icons-react";
-import { Link, Outlet, useNavigate } from "react-router-dom";  // Import Outlet here
+import { Link, Outlet } from "react-router-dom"; // Import Outlet here
 import { motion } from "framer-motion";
 import { cn } from "../../../lib/utils";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../service/redux/authSlice";
+import ErrorBoundary from "../../../service/Helper/ErrorBoundary";
 
 // SidebarDash.tsx
 interface Links {
@@ -22,9 +22,7 @@ interface Links {
   onClick?: () => void;  // Make onClick required
 }
 
-
 export function SidebarDash() {
-
   const links: Links[] = [
     {
       label: "Candidates",
@@ -42,7 +40,7 @@ export function SidebarDash() {
     },
     {
       label: "Scheduled Interviews",
-      href: "/dash/scheduled-iterviews",
+      href: "/dash/scheduled-interviews",
       icon: (
         <IconUserBolt className="text-neutral-700 h-5 w-5 flex-shrink-0" />
       ),
@@ -61,7 +59,6 @@ export function SidebarDash() {
         <IconSettings className="text-neutral-700 h-5 w-5 flex-shrink-0" />
       ),
     },
- 
   ];
 
   const [open, setOpen] = useState(false);
@@ -73,7 +70,7 @@ export function SidebarDash() {
         "h-screen"
       )}
     >
-    <Sidebar open={open} setOpen={setOpen}>
+      <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden w-full">
             {open ? <Logo /> : <LogoIcon />}
@@ -93,7 +90,9 @@ export function SidebarDash() {
           "overflow-y-auto"
         )}
       >
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </div>
     </div>
   );
