@@ -36,7 +36,7 @@ function SelectedCandidates() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const userId = useSelector(selectUserId);
   const jobsListRef = useRef<HTMLDivElement | null>(null);
-  const candidatesListRef = useRef<HTMLDivElement | null>(null); // Added for candidates scroll
+  const candidatesListRef = useRef<HTMLDivElement | null>(null);
 
   const {
     data: jobsData,
@@ -114,7 +114,7 @@ function SelectedCandidates() {
   return (
     <div className="h-screen flex flex-col hide-scrollbar scroll-section">
       <nav className="px-4 py-3 flex justify-around items-center bg-white shadow z-10">
-        {/* You can add a search bar or other elements here */}
+        {/* Add search bar or other elements here */}
       </nav>
 
       <div className="flex flex-grow gap-2">
@@ -161,12 +161,14 @@ function SelectedCandidates() {
             <p>No candidates available for this job.</p>
           ) : (
             candidatesData.map((entry: any) => {
-              const candidate = entry.candidate; // Access candidate object
+              const { candidate, selectedCandidateId } = entry; // Extract candidate and selectedCandidateId
+              console.log("Candidate To Card:", candidate, selectedCandidateId);
+
               return (
                 <SelectedCandidateCard
                   key={candidate._id}
                   candidate={candidate}
-                  // No need to pass onRemove or onUpdateSchedule as props here
+                  selectedCandidateId={selectedCandidateId} // Pass selectedCandidateId as prop
                 />
               );
             })

@@ -5,6 +5,7 @@ import { Calendar } from "../../ui/calendar";
 import { format } from "date-fns";
 
 interface SelectedCandidateCardProps {
+  selectedCandidateId: string; // Added selectedCandidateId prop
   candidate: {
     _id: string;
     fullName: string;
@@ -19,7 +20,10 @@ interface SelectedCandidateCardProps {
   };
 }
 
-const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({ candidate }) => {
+const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
+  selectedCandidateId,  // Destructure the new prop
+  candidate,
+}) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("12:00");
 
@@ -34,7 +38,8 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({ candidate
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
       const interviewDateTime = `${formattedDate} ${selectedTime}`;
       alert(`Interview scheduled on: ${interviewDateTime}`);
-      // Logic to schedule interview should be handled here
+      // Logic to schedule interview should be handled here, you can pass selectedCandidateId
+      console.log(`Scheduling interview for Candidate ID: ${selectedCandidateId}`);
     } else {
       alert("Please select both date and time.");
     }
@@ -44,6 +49,7 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({ candidate
     <div className="border rounded-lg p-4 shadow-md mb-4">
       <div className="flex justify-between items-center mb-4">
         <div>
+          <h3 className="text-xl font-semibold">{selectedCandidateId}</h3>
           <h3 className="text-xl font-semibold">{candidate.fullName}</h3>
           <p className="text-gray-600">Email: {candidate.email}</p>
           <a
