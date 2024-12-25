@@ -84,7 +84,6 @@ function SelectedCandidates() {
     const { scrollTop, scrollHeight, clientHeight } = candidatesListRef.current;
     if (scrollTop + clientHeight >= scrollHeight - 50) {
       // Logic for loading more candidates, if needed
-      // For now, we assume no infinite scroll for candidates
     }
   };
 
@@ -112,16 +111,10 @@ function SelectedCandidates() {
     setSelectedJob(job);
   };
 
-  const handleRemoveCandidate = (candidateId: string) => {
-    // Implement the logic to remove the candidate from the selection
-  };
-
   return (
     <div className="h-screen flex flex-col hide-scrollbar scroll-section">
       <nav className="px-4 py-3 flex justify-around items-center bg-white shadow z-10">
-        <div>
-          {/* <input type="search" placeholder="Search.." className="input" /> */}
-        </div>
+        {/* You can add a search bar or other elements here */}
       </nav>
 
       <div className="flex flex-grow gap-2">
@@ -173,9 +166,8 @@ function SelectedCandidates() {
                 <SelectedCandidateCard
                   key={candidate._id}
                   candidate={candidate}
-                  onRemove={() => handleRemoveCandidate(candidate._id)} onScheduleInterview={function (datetime: string): void {
-                    throw new Error("Function not implemented.");
-                  } }                />
+                  // No need to pass onRemove or onUpdateSchedule as props here
+                />
               );
             })
           )}

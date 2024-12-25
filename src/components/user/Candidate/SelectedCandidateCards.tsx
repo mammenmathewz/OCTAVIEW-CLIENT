@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "../../ui/button"; // Assuming Button is from ShadCN UI
 import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover"; // ShadCN Popover
-import { Calendar } from "../../ui/calendar"; 
+import { Calendar } from "../../ui/calendar";
 import { format } from "date-fns";
 
 interface SelectedCandidateCardProps {
@@ -17,21 +17,11 @@ interface SelectedCandidateCardProps {
     DOB: string;
     country: string;
   };
-  onRemove: () => void;
-  onScheduleInterview: (datetime: string) => void;
 }
 
-const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
-  candidate,
-  onRemove,
-  onScheduleInterview,
-}) => {
+const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({ candidate }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("12:00");
-
-  const handleRemove = () => {
-    onRemove();
-  };
 
   const handleViewResume = () => {
     if (candidate.resumeUrl) {
@@ -43,8 +33,8 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
     if (selectedDate && selectedTime) {
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
       const interviewDateTime = `${formattedDate} ${selectedTime}`;
-      onScheduleInterview(interviewDateTime);
       alert(`Interview scheduled on: ${interviewDateTime}`);
+      // Logic to schedule interview should be handled here
     } else {
       alert("Please select both date and time.");
     }
@@ -64,9 +54,6 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
           >
             LinkedIn Profile
           </a>
-        </div>
-        <div>
-          <Button onClick={handleRemove}>Remove</Button>
         </div>
       </div>
 
@@ -110,9 +97,8 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
             id="time"
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2 bg-black text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
       </div>
 

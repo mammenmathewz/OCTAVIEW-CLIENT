@@ -4,7 +4,7 @@ import axios from "axios";
 import { log } from "console";
 
 export const fetchSelectedCandidatesByJob = async ({ jobId }: { jobId: string }) => {
-  console.log('Fetching candidates for jobId:', jobId);
+  console.log('Fetching selectedcandidates for jobId:', jobId);
 
   try {
       const response = await axiosInstance.get(`/selected/${jobId}`);
