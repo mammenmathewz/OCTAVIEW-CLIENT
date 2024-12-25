@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Menu, X, Copy, Check } from 'lucide-react';
 
-
 const DocumentationPage = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [copiedCode, setCopiedCode] = useState(null);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
     document.documentElement.style.scrollPaddingTop = '80px';
@@ -21,10 +20,10 @@ const DocumentationPage = () => {
     { title: 'Examples', href: '#examples' },
   ];
 
-  const handleNavClick = (e: { preventDefault: () => void; currentTarget: { getAttribute: (arg0: string) => any; }; }) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const href = e.currentTarget.getAttribute('href');
-    const element = document.querySelector(href);
+    const element = document.querySelector(href as string);
     if (element) {
       const topOffset = 80;
       const elementPosition = element.getBoundingClientRect().top;
@@ -38,7 +37,7 @@ const DocumentationPage = () => {
     setIsOpen(false);
   };
 
-  const copyToClipboard = async (code:any, blockId:any) => {
+  const copyToClipboard = async (code: string, blockId: string) => {
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(blockId);
@@ -48,25 +47,28 @@ const DocumentationPage = () => {
     }
   };
 
-  const exampleCode = `import React from 'react';
-import OctaviewClient from 'octaview-client';
+  const exampleCode = `import React from "react";
+import OctaviewClient from "./octaview-client";
 
 function App() {
-  const props = {
-    url: "http://localhost:3030/jobs",
-    background: "#f0f0f0",
-    textColor: "#000000"
+  const obj = {
+    url: "http://localhost:5000/api/jobs/ext",
+    background: "#F5F5F5", 
+    textColor: "#2F4F4F",  
+    buttonColor: "#00796B", 
+    api: "esdjg;lkioletn;regtrhth", 
+    userId: "675d58a04ecf93555922208f", 
   };
 
   return (
-    <div>
-      <h1>Job Listings</h1>
-      <OctaviewClient {...props} />
-    </div>
+    <>
+      <OctaviewClient {...obj} />
+    </>
   );
 }
 
-export default App;`;
+export default App;
+`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -111,17 +113,13 @@ export default App;`;
               octaview-client Documentation
             </h1>
             <p className="text-gray-600 leading-relaxed">
-              The octaview-client is a React component designed to integrate job listing functionalities 
-              into your application. It fetches job data from a specified URL and renders it with 
-              customizable styles.
+              The octaview-client is a React component designed to integrate job listing functionalities into your application. It fetches job data from a specified URL and renders it with customizable styles.
             </p>
           </section>
 
           {/* Features */}
           <section id="features" className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Features
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Features</h2>
             <ul className="list-disc list-inside space-y-2 text-gray-600">
               <li>Dynamic Job Listings: Fetches job data in real-time from your backend application.</li>
               <li>Customizable Appearance: Easy customization options for background and text color.</li>
@@ -131,9 +129,7 @@ export default App;`;
 
           {/* Installation */}
           <section id="installation" className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Installation
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Installation</h2>
             <p className="text-gray-600 mb-4">
               To use octaview-client in your React application, follow these steps:
             </p>
@@ -175,95 +171,59 @@ export default App;`;
 
           {/* Props */}
           <section id="props" className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Props
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Prop
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Description
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      url
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      string
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      The endpoint to fetch job data from
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      background
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      string
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      The background color for the component
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      textColor
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      string
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      The text color for the component
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
+  <h2 className="text-2xl font-bold text-gray-900 mb-4">Props</h2>
+  <div className="overflow-x-auto">
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50">
+        <tr>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prop</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">url</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+          <td className="px-6 py-4 text-sm text-gray-500">The endpoint to fetch job data from</td>
+        </tr>
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">background</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+          <td className="px-6 py-4 text-sm text-gray-500">The background color for the component</td>
+        </tr>
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">textColor</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+          <td className="px-6 py-4 text-sm text-gray-500">The text color for the component</td>
+        </tr>
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">buttonColor</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+          <td className="px-6 py-4 text-sm text-gray-500">The button color for the component</td>
+        </tr>
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">api</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+          <td className="px-6 py-4 text-sm text-gray-500">The API key used for authentication</td>
+        </tr>
+        <tr>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">userId</td>
+          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
+          <td className="px-6 py-4 text-sm text-gray-500">The unique identifier for the user</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 
-          {/* Examples */}
+
+          {/* Example */}
           <section id="examples" className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Examples
-            </h2>
-            <div className="bg-gray-50 p-6 rounded-lg mb-6">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <p className="text-gray-600 mb-4">
-                  Below is an example of how to use the OctaviewClient component:
-                </p>
-                <div className="relative mt-4">
-                  <div className="bg-gray-100 rounded-lg p-6">
-                    <button
-                      onClick={() => copyToClipboard(exampleCode, 'example')}
-                      className="absolute top-4 right-4 p-2 hover:bg-gray-200 rounded-md transition-colors"
-                      aria-label={copiedCode === 'example' ? 'Copied!' : 'Copy code'}
-                    >
-                      {copiedCode === 'example' ? (
-                        <Check className="h-5 w-5 text-green-500" />
-                      ) : (
-                        <Copy className="h-5 w-5 text-gray-500 hover:text-gray-700" />
-                      )}
-                    </button>
-                    <pre className="overflow-x-auto">
-                      <code className="text-sm font-mono text-gray-800 whitespace-pre">
-                        {exampleCode}
-                      </code>
-                    </pre>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Example Usage</h2>
+            <pre className="bg-gray-100 p-6 rounded-lg overflow-auto">
+              <code className="text-sm font-mono text-gray-800">{exampleCode}</code>
+            </pre>
           </section>
         </div>
       </main>

@@ -110,7 +110,7 @@ export function LoginForm() {
         <div className="bg-gradient-to-r from-transparent via-neutral-300 to-transparent my-8 h-[1px] w-full" />
 
         {/* Placeholder for Google login button */}
-        <button
+        {/* <button
           className="relative group/btn flex space-x-2 items-center justify-start px-4 w-full text-black rounded-md h-10 font-medium shadow-input bg-gray-50 hover:bg-gray-100 transition duration-300"
           type="button"
           disabled={isPending}
@@ -118,7 +118,7 @@ export function LoginForm() {
           <IconBrandGoogle className="h-4 w-4 text-neutral-800" />
           <span className="text-neutral-700 text-sm">Login with Google</span>
           <BottomGradient />
-        </button>
+        </button> */}
       </form>
     </div>
   );

@@ -9,7 +9,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../service/redux/authSlice";
 import { useToast } from '../../@/hooks/use-toast';
-
+import { useSelector } from 'react-redux';
+import { selectUserId } from '../../service/redux/store';
 
 
 const Settings = () => {
@@ -19,6 +20,7 @@ const Settings = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const {toast} = useToast()
+  const userId = useSelector(selectUserId);
 
   const sidebarLinks = [
     { title: 'Payment', href: '#payment', icon: CreditCard },
@@ -99,13 +101,13 @@ const Settings = () => {
               </div>
               <Separator />
               <div className="space-y-2">
-                <Label htmlFor="webhookUrl">Webhook URL</Label>
+                <Label htmlFor="webhookUrl">Id</Label>
                 <div className="flex space-x-2">
                   <Input
                     id="webhookUrl"
-                    type="url"
+                    type="text"
                     placeholder=""
-                    value="https://example.com/webhook"
+                    value={userId ?? ''}
                     readOnly
                   />
                   <Button
