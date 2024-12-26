@@ -1,15 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import debounce from "lodash.debounce";
 import "../../components/Styles/Scroll.css";
 import { Input } from "../../components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 import JobCard from "../../components/user/Job/JobCard";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../../service/redux/store";
@@ -46,11 +38,26 @@ type Candidate = {
 
 function CandidateList() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>(""); // State for search term
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(""); // State for debounced search
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the "observer" element
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
-  // Fetching jobs with pagination
+  // Debounced handler for search input
+  const debouncedHandleSearchChange = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearch(value); // Update the debounced search state
+    }, 300), // 300ms delay
+    []
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value); // Update local search term immediately
+    debouncedHandleSearchChange(e.target.value); // Trigger the debounced function
+  };
+
+  // Fetching jobs with pagination and search query
   const {
     data,
     error,
@@ -59,8 +66,9 @@ function CandidateList() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["jobs", userId],
-    queryFn: ({ pageParam = 1 }) => fetchJobs({ pageParam, userId }),
+    queryKey: ["jobs", userId, debouncedSearch],
+    queryFn: ({ pageParam = 1 }) =>
+      fetchJobs({ pageParam, userId: userId ?? "", search: debouncedSearch }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.nextPage : undefined;
@@ -77,12 +85,11 @@ function CandidateList() {
       if (selectedJob) {
         return fetchCandidatesByJob(selectedJob.id);
       }
-      return []; // Return an empty array if selectedJob is null
+      return [];
     },
     enabled: !!selectedJob?.id, // Only run when selectedJob?.id is available
     refetchOnWindowFocus: false,
   });
-  
 
   useEffect(() => {
     if (!observerRef.current) return;
@@ -107,28 +114,20 @@ function CandidateList() {
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   const handleCardClick = (job: Job) => {
-    setSelectedJob(job); 
+    setSelectedJob(job);
   };
 
   return (
     <div className="h-screen flex flex-col hide-scrollbar scroll-section">
       <nav className="px-4 py-3 flex justify-around items-center bg-white shadow z-10">
         <div>
-          <Select>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Sort by</SelectLabel>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="hidden">Hidden</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Input type="search" placeholder="Search.." />
+          {/* Search Input */}
+          <Input
+            type="search"
+            placeholder="Search.."
+            value={searchTerm}
+            onChange={handleSearchChange} // Update search state on input change
+          />
         </div>
       </nav>
 
@@ -139,6 +138,8 @@ function CandidateList() {
             <p>Loading jobs...</p>
           ) : error ? (
             <p>Error loading jobs.</p>
+          ) : data?.pages.every((page) => page.jobs.length === 0) ? (
+            <p>No jobs found.</p> // Show this message if no jobs are found
           ) : (
             data?.pages.map((page) =>
               page.jobs.map((job: Job) => (
@@ -173,32 +174,31 @@ function CandidateList() {
           ) : (
             candidatesData?.map((candidate: Candidate) => (
               <CandidateCard
-              key={candidate.id}
-              name={candidate.fullName}
-              email={candidate.email}
-              phone={candidate.contactNo}
-              country={candidate.country}
-              status={candidate.status}
-              onClick={() =>
-                navigate("/dash/candidate-details", {
-                  state: {
-                    candidate: {
-                      id: candidate.id,
-                      fullName: candidate.fullName,
-                      dob: candidate.DOB,
-                      contactNo: candidate.contactNo,
-                      country: candidate.country,
-                      email: candidate.email,
-                      github: candidate.github,
-                      linkedin: candidate.linkedin,
-                      resumeUrl: candidate.resumeUrl,
+                key={candidate.id}
+                name={candidate.fullName}
+                email={candidate.email}
+                phone={candidate.contactNo}
+                country={candidate.country}
+                status={candidate.status}
+                onClick={() =>
+                  navigate("/dash/candidate-details", {
+                    state: {
+                      candidate: {
+                        id: candidate.id,
+                        fullName: candidate.fullName,
+                        dob: candidate.DOB,
+                        contactNo: candidate.contactNo,
+                        country: candidate.country,
+                        email: candidate.email,
+                        github: candidate.github,
+                        linkedin: candidate.linkedin,
+                        resumeUrl: candidate.resumeUrl,
+                      },
+                      jobId: selectedJob?.id, // Include the jobId here
                     },
-                    jobId: selectedJob?.id, // Include the jobId here
-                  },
-                })
-              }
-            />
-            
+                  })
+                }
+              />
             ))
           )}
         </div>

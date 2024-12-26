@@ -6,6 +6,7 @@ import { fetchJobs } from "../../service/Api/jobApis";
 import { fetchSelectedCandidatesByJob } from "../../service/Api/candidateApi";
 import JobCard from "../../components/user/Job/JobCard";
 import SelectedCandidateCard from "../../components/user/Candidate/SelectedCandidateCards";
+import { Input } from "../../components/ui/input";
 
 type Job = {
   id: string;
@@ -34,9 +35,10 @@ type Candidate = {
 
 function SelectedCandidates() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>(""); // State for search term
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(""); // Debounced search term
   const userId = useSelector(selectUserId);
   const jobsListRef = useRef<HTMLDivElement | null>(null);
-  const candidatesListRef = useRef<HTMLDivElement | null>(null);
 
   const {
     data: jobsData,
@@ -46,10 +48,11 @@ function SelectedCandidates() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["SelectedCandidatejobs", userId],
-    queryFn: ({ pageParam = 1 }) => fetchJobs({ pageParam, userId }),
-    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextPage : undefined),
+    queryKey: ["jobs", userId, debouncedSearch],
+    queryFn: ({ pageParam = 1 }) =>
+      fetchJobs({ pageParam, userId: userId ?? "", search: debouncedSearch }),
     initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextPage : undefined),
   });
 
   const {
@@ -78,14 +81,16 @@ function SelectedCandidates() {
     }
   };
 
-  const handleCandidatesScroll = () => {
-    if (!candidatesListRef.current || isFetchingNextPage || !hasNextPage) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = candidatesListRef.current;
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      // Logic for loading more candidates, if needed
-    }
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500); // Delay API call by 500ms
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
     const jobsListElement = jobsListRef.current;
@@ -97,16 +102,6 @@ function SelectedCandidates() {
     };
   }, [isFetchingNextPage, hasNextPage]);
 
-  useEffect(() => {
-    const candidatesListElement = candidatesListRef.current;
-    if (!candidatesListElement) return;
-
-    candidatesListElement.addEventListener("scroll", handleCandidatesScroll);
-    return () => {
-      candidatesListElement.removeEventListener("scroll", handleCandidatesScroll);
-    };
-  }, [isFetchingNextPage, hasNextPage]);
-
   const handleCardClick = (job: Job) => {
     setSelectedJob(job);
   };
@@ -114,7 +109,15 @@ function SelectedCandidates() {
   return (
     <div className="h-screen flex flex-col hide-scrollbar scroll-section">
       <nav className="px-4 py-3 flex justify-around items-center bg-white shadow z-10">
-        {/* Add search bar or other elements here */}
+        <div>
+          {/* Search Input */}
+          <Input
+            type="search"
+            placeholder="Search jobs..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+        </div>
       </nav>
 
       <div className="flex flex-grow gap-2">
@@ -149,10 +152,7 @@ function SelectedCandidates() {
         </div>
 
         {/* Right Column - Selected Candidates */}
-        <div
-          className="bg-white w-3/4 p-4 hide-scrollbar scroll-section overflow-y-auto"
-          ref={candidatesListRef}
-        >
+        <div className="bg-white w-3/4 p-4 hide-scrollbar scroll-section overflow-y-auto">
           {isCandidatesLoading ? (
             <p>Loading candidates...</p>
           ) : candidatesError ? (
@@ -161,14 +161,12 @@ function SelectedCandidates() {
             <p>No candidates available for this job.</p>
           ) : (
             candidatesData.map((entry: any) => {
-              const { candidate, selectedCandidateId } = entry; // Extract candidate and selectedCandidateId
-              console.log("Candidate To Card:", candidate, selectedCandidateId);
-
+              const { candidate, selectedCandidateId } = entry;
               return (
                 <SelectedCandidateCard
                   key={candidate._id}
                   candidate={candidate}
-                  selectedCandidateId={selectedCandidateId} // Pass selectedCandidateId as prop
+                  selectedCandidateId={selectedCandidateId}
                 />
               );
             })
