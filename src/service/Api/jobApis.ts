@@ -15,29 +15,36 @@ export const submitJob = async (jobData: any, userId: UserId): Promise<any> => {
 export const fetchJobs = async ({
   pageParam = 1,
   userId,
+  search = "",
 }: {
   pageParam?: number;
-  userId: UserId;  // Ensure this type matches what you're using for userId
+  userId: string; // Adjusted for clarity; ensure `userId` matches your application type
+  search?: string; // Optional search string for filtering jobs
 }): Promise<{ jobs: Job[]; hasMore: boolean; nextPage: number | null }> => {
   try {
-    // Requesting jobs with pagination and userId in the URL path
+    console.log("fetchJobs", userId, search);
+    
     const response = await axiosInstance.get(`/jobs/${userId}`, {
       params: {
-        page: pageParam,  
+        page: pageParam,
+        search, // Pass search parameter to backend
       },
     });
+
     return {
-      jobs: response.data.jobs,  
-      hasMore: response.data.hasMore, 
-      nextPage: response.data.nextPage,  // Assuming the response includes the nextPage cursor or null if no more pages
+      jobs: response.data.jobs || [], // Default to an empty array if no jobs are returned
+      hasMore: response.data.hasMore || false, // Ensure hasMore is a boolean
+      nextPage: response.data.nextPage || null, // Handle cases where nextPage might be undefined
     };
   } catch (error) {
     if (axios.isAxiosError(error)) {
+      // Extract error message from backend or fallback to generic error
       const backendError =
-        error.response?.data?.error || "An unexpected error occurred";
-      throw new Error(backendError);  // Throw the error from the backend if available
+        error.response?.data?.error || "Failed to fetch jobs. Please try again.";
+      throw new Error(backendError);
     } else {
-      throw new Error("An unexpected error occurred");  // Fallback error for unexpected issues
+      // Handle unexpected errors
+      throw new Error("An unexpected error occurred while fetching jobs.");
     }
   }
 };

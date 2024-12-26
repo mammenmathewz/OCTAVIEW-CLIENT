@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import debounce from "lodash.debounce";
 import "../../components/Styles/Scroll.css";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -29,6 +30,8 @@ interface JobsResponse {
 function JobPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // State for search input
+  const [debouncedSearch, setDebouncedSearch] = useState(""); // Debounced search term
 
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null);
@@ -41,15 +44,31 @@ function JobPage() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["jobs", userId ?? ''],
+    queryKey: ["jobs", userId, debouncedSearch], // Include search term
     queryFn: async ({ pageParam = 1 }) => {
-      const response = await fetchJobs({ pageParam, userId: userId ?? '' });
+      const response = await fetchJobs({
+        pageParam,
+        userId: userId ?? "",
+        search: debouncedSearch, // Pass search term to API
+      });
       return response;
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage || undefined,
     enabled: !!userId,
   });
+
+  // Debounce search term updates
+  const updateDebouncedSearch = useCallback(
+    debounce((value: string) => setDebouncedSearch(value), 500),
+    []
+  );
+
+  // Update debounced search term whenever the search input changes
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    updateDebouncedSearch(event.target.value);
+  };
 
   useEffect(() => {
     const currentObserver = observerRef.current;
@@ -128,7 +147,7 @@ function JobPage() {
     <div className="h-screen flex flex-col hide-scrollbar scroll-section">
       <nav className="px-4 py-3 flex justify-between items-center bg-white shadow z-10">
         <div>
-          <Select>
+          {/* <Select>
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Sort" />
             </SelectTrigger>
@@ -139,10 +158,15 @@ function JobPage() {
                 <SelectItem value="hidden">Hidden</SelectItem>
               </SelectGroup>
             </SelectContent>
-          </Select>
+          </Select> */}
         </div>
         <div>
-          <Input type="search" placeholder="Search.." />
+          <Input
+            type="search"
+            placeholder="Search.."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
         </div>
         <Button variant="default" onClick={handleAddNew}>
           Add New
