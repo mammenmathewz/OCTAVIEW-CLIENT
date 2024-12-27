@@ -2,16 +2,19 @@
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../../ui/sideBar";
 import {
+  IconAdjustments,
   IconArrowLeft,
   IconBrandTabler,
+  IconBriefcase,
+  IconCalendarEvent,
   IconSettings,
   IconUserBolt,
+  IconUserCheck,
+  IconUsers,
 } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom"; // Import Outlet here
 import { motion } from "framer-motion";
 import { cn } from "../../../lib/utils";
-import { useDispatch } from "react-redux";
-import { logout } from "../../../service/redux/authSlice";
 import ErrorBoundary from "../../../utils/ErrorBoundary";
 
 // SidebarDash.tsx
@@ -27,39 +30,30 @@ export function SidebarDash() {
     {
       label: "Candidates",
       href: "/dash/candidates",
-      icon: (
-        <IconBrandTabler className="text-neutral-700 h-5 w-5 flex-shrink-0" />
-      ),
+      icon: <IconUsers className="text-neutral-700 h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "Selected Candidates",
       href: "/dash/selected-candidates",
-      icon: (
-        <IconUserBolt className="text-neutral-700 h-5 w-5 flex-shrink-0" />
-      ),
+      icon: <IconUserCheck className="text-neutral-700 h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "Scheduled Interviews",
       href: "/dash/scheduled-interviews",
-      icon: (
-        <IconUserBolt className="text-neutral-700 h-5 w-5 flex-shrink-0" />
-      ),
+      icon: <IconCalendarEvent className="text-neutral-700 h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "Jobs",
       href: "/dash/jobs",
-      icon: (
-        <IconUserBolt className="text-neutral-700 h-5 w-5 flex-shrink-0" />
-      ),
+      icon: <IconBriefcase className="text-neutral-700 h-5 w-5 flex-shrink-0" />,
     },
     {
       label: "Settings",
       href: "/dash/settings",
-      icon: (
-        <IconSettings className="text-neutral-700 h-5 w-5 flex-shrink-0" />
-      ),
+      icon: <IconAdjustments className="text-neutral-700 h-5 w-5 flex-shrink-0" />,
     },
   ];
+  
 
   const [open, setOpen] = useState(false);
 
