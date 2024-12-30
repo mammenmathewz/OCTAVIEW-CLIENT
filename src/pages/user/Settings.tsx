@@ -23,7 +23,7 @@ const Settings = () => {
   const userId = useSelector(selectUserId);
 
   const sidebarLinks = [
-    { title: 'Payment', href: '#payment', icon: CreditCard },
+    // { title: 'Payment', href: '#payment', icon: CreditCard },
     { title: 'API Settings', href: '#api', icon: Key },
     { title: 'Logout', href: '#logout', icon: LogOut },
   ];
@@ -127,41 +127,41 @@ const Settings = () => {
           </Card>
         );
 
-      case 'payment':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Settings</CardTitle>
-              <CardDescription>Manage your subscription and billing</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold">Amout to pay: </h3>
-                      <p className="text-sm text-muted-foreground">$29/month</p>
-                    </div>
-                    <span className="text-sm text-emerald-600 font-medium">Active</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Next billing date: January 2, 2025
-                  </p> <p className="text-sm text-muted-foreground">
-                    last date : January 1, 2025
-                  </p>
-                </CardContent>
-              </Card>
-              <div className="space-y-2">
-                <Button className="w-full">
-                  Update Payment Method
-                </Button>
-                <Button variant="secondary" className="w-full">
-                  Pay now
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        );
+      // case 'payment':
+      //   return (
+      //     <Card>
+      //       <CardHeader>
+      //         <CardTitle>Payment Settings</CardTitle>
+      //         <CardDescription>Manage your subscription and billing</CardDescription>
+      //       </CardHeader>
+      //       <CardContent className="space-y-6">
+      //         <Card>
+      //           <CardContent className="pt-6">
+      //             <div className="flex justify-between mb-4">
+      //               <div>
+      //                 <h3 className="font-semibold">Amout to pay: </h3>
+      //                 <p className="text-sm text-muted-foreground">$29/month</p>
+      //               </div>
+      //               <span className="text-sm text-emerald-600 font-medium">Active</span>
+      //             </div>
+      //             <p className="text-sm text-muted-foreground">
+      //               Next billing date: January 2, 2025
+      //             </p> <p className="text-sm text-muted-foreground">
+      //               last date : January 1, 2025
+      //             </p>
+      //           </CardContent>
+      //         </Card>
+      //         <div className="space-y-2">
+      //           <Button className="w-full">
+      //             Update Payment Method
+      //           </Button>
+      //           <Button variant="secondary" className="w-full">
+      //             Pay now
+      //           </Button>
+      //         </div>
+      //       </CardContent>
+      //     </Card>
+      //   );
 
       case 'logout':
         return (
