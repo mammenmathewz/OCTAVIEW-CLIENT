@@ -39,7 +39,7 @@ function App() {
           </Route>
 
           <Route path="/meet" element={<Meet />} />
-          <Route path="/admin" element={<AdminDash />} />
+          <Route path="/admin" element={<AdminDash />} /> 
           <Route path="/admin-login" element={<AdminLogin />} />
         </Routes>
       </ErrorBoundary>
