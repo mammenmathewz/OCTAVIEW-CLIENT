@@ -101,7 +101,7 @@ const Settings = () => {
               </div>
               <Separator />
               <div className="space-y-2">
-                <Label htmlFor="webhookUrl">Id</Label>
+                <Label htmlFor="webhookUrl">Reference Id</Label>
                 <div className="flex space-x-2">
                   <Input
                     id="webhookUrl"
@@ -112,10 +112,12 @@ const Settings = () => {
                   />
                   <Button
                     onClick={() => {
-                      navigator.clipboard.writeText("https://example.com/webhook");
-                     toast({
-                      description:'copied to clipboard'
-                     })
+                    if (userId) {
+                      navigator.clipboard.writeText(userId);
+                      toast({
+                        description: 'copied to clipboard'
+                      });
+                    }
                     }}
                   >
                     Copy
