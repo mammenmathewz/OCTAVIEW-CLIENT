@@ -52,7 +52,6 @@ import OctaviewClient from "./octaview-client";
 
 function App() {
   const obj = {
-    url: "http://localhost:5000/api/jobs/ext",
     background: "#F5F5F5", 
     textColor: "#2F4F4F",  
     buttonColor: "#00796B", 
@@ -182,11 +181,7 @@ export default App;
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
-        <tr>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">url</td>
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
-          <td className="px-6 py-4 text-sm text-gray-500">The endpoint to fetch job data from</td>
-        </tr>
+
         <tr>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">background</td>
           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">string</td>
