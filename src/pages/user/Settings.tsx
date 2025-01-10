@@ -114,7 +114,7 @@ const Settings = () => {
                     className="font-mono"
                     onClick={() => {
                       if (!isApiKeyLoading && apiKey) {
-                        navigator.clipboard.writeText(apiKey);
+                        navigator.clipboard.writeText(apiKey.apiKey);
                         toast({ description: "Copied to clipboard" });
                       }
                     }}
