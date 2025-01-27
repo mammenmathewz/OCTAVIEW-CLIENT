@@ -100,7 +100,7 @@ const Settings = () => {
           <Card>
             <CardHeader>
               <CardTitle>API Settings</CardTitle>
-              <CardDescription>Manage your API keys and webhook settings</CardDescription>
+              <CardDescription>Manage your API keys </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
