@@ -16,6 +16,7 @@ import DashboardOverview from "./components/user/Console/DashboardOverview";
 import JobPage from "./pages/user/JobList";
 import CandidateDetails from "./pages/user/CandidateDetails";
 import ErrorBoundary from "./utils/ErrorBoundary";  // Import the ErrorBoundary component
+import CreateRoom from "./pages/user/CreateRoom";  // Import CreateRoom component
 
 function App() {
   return (
@@ -38,7 +39,8 @@ function App() {
             </Route>
           </Route>
 
-          <Route path="/meet" element={<Meet />} />
+          <Route path="/meet/:roomId" element={<Meet />} />
+          <Route path="/create-room" element={<CreateRoom />} />  {/* Add CreateRoom route */}
           {/* <Route path="/admin" element={<AdminDash />} /> 
           <Route path="/admin-login" element={<AdminLogin />} /> */}
         </Routes>
@@ -48,4 +50,5 @@ function App() {
 }
 
 export default App;
+
 
