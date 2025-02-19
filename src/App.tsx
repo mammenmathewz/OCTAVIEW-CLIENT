@@ -7,7 +7,6 @@ import Dash from "./pages/user/Dash";
 import CandidateList from "./pages/user/CandidateList";
 import SelectedCandidates from "./pages/user/SelectedCandidates";
 import ScheduledCandidates from "./pages/user/ScheduledCandidates";
-import Meet from "./pages/user/Meet";
 import Settings from "./pages/user/Settings";
 import AdminDash from "./pages/admin/AdminDash";
 import AdminLogin from "./pages/admin/Login";
@@ -17,6 +16,7 @@ import JobPage from "./pages/user/JobList";
 import CandidateDetails from "./pages/user/CandidateDetails";
 import ErrorBoundary from "./utils/ErrorBoundary";  // Import the ErrorBoundary component
 import CreateRoom from "./pages/user/CreateRoom";  // Import CreateRoom component
+import InterviewRoom from "./pages/user/InterviewRoom";  // Import InterviewRoom component
 
 function App() {
   return (
@@ -39,7 +39,7 @@ function App() {
             </Route>
           </Route>
 
-          <Route path="/meet/:roomId" element={<Meet />} />
+          <Route path="/meet/:roomId" element={<InterviewRoom />} />
           <Route path="/create-room" element={<CreateRoom />} />  {/* Add CreateRoom route */}
           {/* <Route path="/admin" element={<AdminDash />} /> 
           <Route path="/admin-login" element={<AdminLogin />} /> */}

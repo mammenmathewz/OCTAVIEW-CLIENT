@@ -1,159 +1,149 @@
-import React, { useState } from 'react';
-import Editor from '@monaco-editor/react';
-import { Settings2, Play, Download, FolderTree } from 'lucide-react';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '../../ui/resizable';
+import React, { useEffect, useRef, useState } from "react";
+import Editor, { OnMount } from "@monaco-editor/react";
+import * as Y from "yjs";
+import { WebrtcProvider } from "y-webrtc";
+import { MonacoBinding } from "y-monaco";
+import { editor } from "monaco-editor";
 
-const languages = [
-  'javascript',
-  'typescript',
-  'python',
-  'java',
-  'cpp',
-  'csharp',
-  'html',
-  'css',
-  'json',
-  'markdown',
-];
+const CodeEditor = ({ roomId }: { roomId: string }) => {
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [peerCount, setPeerCount] = useState(0);
+  const providerRef = useRef<WebrtcProvider | null>(null);
+  const docRef = useRef<Y.Doc | null>(null);
+  const bindingRef = useRef<MonacoBinding | null>(null);
 
-const defaultCode = {
-  javascript: '// Write your JavaScript code here\nconsole.log("Hello World!");',
-  typescript:
-    '// Write your TypeScript code here\nconst greeting: string = "Hello World!";\nconsole.log(greeting);',
-  python: '# Write your Python code here\nprint("Hello World!")',
-  java: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World!");\n    }\n}',
-  cpp: '#include <iostream>\n\nint main() {\n    std::cout << "Hello World!" << std::endl;\n    return 0;\n}',
-  csharp:
-    'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello World!");\n    }\n}',
-  html: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Hello World</title>\n</head>\n<body>\n    <h1>Hello World!</h1>\n</body>\n</html>',
-  css: 'body {\n    font-family: Arial, sans-serif;\n    color: #333;\n    margin: 0;\n    padding: 20px;\n}',
-  json: '{\n    "message": "Hello World!"\n}',
-  markdown: '# Hello World\n\nWelcome to the editor!',
-};
-
-const CodeEditor = () => {
-  const [language, setLanguage] = useState('javascript');
-  const [code, setCode] = useState(defaultCode[language as keyof typeof defaultCode]);
-  const [theme, setTheme] = useState('vs-dark');
-  const [terminalOutput, setTerminalOutput] = useState<string[]>([]);
-
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLang = e.target.value;
-    setLanguage(newLang);
-    setCode(defaultCode[newLang as keyof typeof defaultCode]);
-  };
-
-//   const handleThemeChange = () => {
-//     setTheme(theme === 'vs-dark' ? 'light' : 'vs-dark');
-//   };
-
-  const handleRun = () => {
-    try {
-      if (language === 'javascript' || language === 'typescript') {
-        const result = new Function(code)();
-        setTerminalOutput((prev) => [...prev, `> ${result}`]);
-      } else {
-        setTerminalOutput((prev) => [
-          ...prev,
-          `> Code compilation simulated for ${language}`,
-        ]);
-      }
-    } catch (error) {
-      setTerminalOutput((prev) => [...prev, `Error: ${error}`]);
+  // Cleanup function
+  const cleanup = () => {
+    if (bindingRef.current) {
+      bindingRef.current.destroy();
+      bindingRef.current = null;
+    }
+    if (providerRef.current) {
+      providerRef.current.destroy();
+      providerRef.current = null;
+    }
+    if (docRef.current) {
+      docRef.current.destroy();
+      docRef.current = null;
     }
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([code], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `code.${language}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // Initialize Y.js and WebRTC
+  useEffect(() => {
+    if (!roomId) return;
+
+    cleanup(); // Clean up previous instances
+
+    // Initialize Yjs document
+    const yDoc = new Y.Doc();
+    docRef.current = yDoc;
+    
+    // Configure WebRTC provider
+    const webrtcProvider = new WebrtcProvider(`code-${roomId}`, yDoc, {
+      signaling: ['ws://localhost:4444'],
+      maxConns: 20,
+      filterBcConns: false,
+      peerOpts: {
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+          ]
+        }
+      }
+    });
+
+    providerRef.current = webrtcProvider;
+
+    // Set awareness states for user presence
+    webrtcProvider.awareness.setLocalState({
+      name: `User-${Math.floor(Math.random() * 1000)}`,
+      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
+    });
+
+    // Track connection status
+    const updatePeerCount = () => {
+      const count = Array.from(webrtcProvider.awareness.getStates().keys()).length - 1;
+      setPeerCount(Math.max(0, count));
+    };
+
+    webrtcProvider.awareness.on('change', updatePeerCount);
+    
+    webrtcProvider.on('synced', ({ synced }: { synced: boolean }) => {
+      console.log('Document synced:', synced);
+      setIsConnected(synced);
+    });
+
+    webrtcProvider.on('status', ({ connected }: { connected: boolean }) => {
+      console.log('Connection status:', connected ? 'connected' : 'disconnected');
+      setIsConnected(connected);
+    });
+
+    // Create Monaco binding when editor is available
+    if (editorRef.current) {
+      createBinding(editorRef.current, yDoc, webrtcProvider);
+    }
+
+    return () => {
+      webrtcProvider.awareness.off('change', updatePeerCount);
+      cleanup();
+    };
+  }, [roomId]);
+
+  // Create binding when editor becomes available
+  const createBinding = (
+    editor: editor.IStandaloneCodeEditor,
+    yDoc: Y.Doc,
+    provider: WebrtcProvider
+  ) => {
+    if (bindingRef.current) {
+      bindingRef.current.destroy();
+    }
+
+    const yText = yDoc.getText('monaco');
+    const monacoModel = editor.getModel();
+    
+    if (monacoModel) {
+      bindingRef.current = new MonacoBinding(
+        yText,
+        monacoModel,
+        new Set([editor]),
+        provider.awareness
+      );
+      console.log('Monaco binding created');
+    }
+  };
+
+  // Handle editor mounting
+  const handleEditorDidMount: OnMount = (editor) => {
+    editorRef.current = editor;
+    
+    if (docRef.current && providerRef.current) {
+      createBinding(editor, docRef.current, providerRef.current);
+    }
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
-      {/* Top Bar */}
-      <div className="bg-gray-800 p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-        
-          <select
-            value={language}
-            onChange={handleLanguageChange}
-            className="bg-gray-700 text-white px-3 py-1 rounded-md border border-gray-600"
-          >
-            {languages.map((lang) => (
-              <option key={lang} value={lang}>
-                {lang.charAt(0).toUpperCase() + lang.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex items-center space-x-4">
-          {/* <button
-            onClick={handleThemeChange}
-            className="text-gray-300 hover:text-white"
-          >
-            <Settings2 size={20} />
-          </button> */}
-          <button
-            onClick={handleRun}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-1 rounded-md flex items-center space-x-2"
-          >
-            <Play size={16} />
-            <span>Run</span>
-          </button>
-          <button
-            onClick={handleDownload}
-            className="text-gray-300 hover:text-white"
-          >
-            <Download size={20} />
-          </button>
-        </div>
+    <div className="flex flex-col h-full">
+      <div className="bg-gray-800 p-2 text-white text-sm flex justify-between items-center">
+        <span>
+          Status: {isConnected ? `Connected (${peerCount} peer${peerCount !== 1 ? 's' : ''})` : 'Connecting...'}
+        </span>
       </div>
-
-      {/* Main Content */}
-      <ResizablePanelGroup direction="vertical">
-        {/* Editor Panel */}
-        <ResizablePanel>
-          <Editor
-            height="100%"
-            language={language}
-            value={code}
-            theme={theme}
-            onChange={(value) => setCode(value || '')}
-            options={{
-              fontSize: 14,
-              minimap: { enabled: true },
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-              lineNumbers: 'on',
-            }}
-          />
-        </ResizablePanel>
-
-        {/* Resizable Handle */}
-        <ResizableHandle className="bg-gray-600 hover:bg-gray-500 cursor-row-resize" />
-
-        {/* Terminal Panel */}
-        <ResizablePanel>
-          <div className="h-full bg-gray-950 text-gray-200 p-2 overflow-y-auto">
-            {terminalOutput.map((output, index) => (
-              <div key={index} className="text-sm font-mono">
-                {output}
-              </div>
-            ))}
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+      <Editor
+        height="calc(100vh - 40px)"
+        defaultLanguage="javascript"
+        defaultValue="// Start coding..."
+        onMount={handleEditorDidMount}
+        theme="vs-dark"
+        options={{
+          fontSize: 14,
+          minimap: { enabled: false },
+          automaticLayout: true,
+          wordWrap: 'on'
+        }}
+      />
     </div>
   );
 };
