@@ -23,159 +23,112 @@ const Meet = () => {
       navigate("/");
       return;
     }
-
+  
     const initializePeerConnection = () => {
+      if (peerConnection.current) {
+        peerConnection.current.close(); // Close any existing connection
+      }
+  
       const config: RTCConfiguration = {
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
           { urls: "stun:stun1.l.google.com:19302" },
           { urls: "stun:stun2.l.google.com:19302" },
-          {
-            urls: "turn:turn.anyfirewall.com:3478",
-            username: "webrtc",
-            credential: "webrtc"
-          }
         ],
-        iceCandidatePoolSize: 10,
       };
-
+  
       peerConnection.current = new RTCPeerConnection(config);
-
-      // Log state changes for debugging
-      peerConnection.current.oniceconnectionstatechange = () => {
-        console.log("ICE Connection State:", peerConnection.current?.iceConnectionState);
-      };
-
-      peerConnection.current.onconnectionstatechange = () => {
-        console.log("Connection State:", peerConnection.current?.connectionState);
-      };
-
-      peerConnection.current.onsignalingstatechange = () => {
-        console.log("Signaling State:", peerConnection.current?.signalingState);
-      };
-
-      // Handle remote stream
-      peerConnection.current.ontrack = (event) => {
-        console.log("Received remote track:", event.streams[0]);
-        if (remoteVideoRef.current && event.streams[0]) {
-          remoteVideoRef.current.srcObject = event.streams[0];
-        }
-      };
-
-      return peerConnection.current;
-    };
-
-    const startCall = async () => {
-      try {
-        console.log("Starting call initialization...");
-        
-        // Get local media
-        localStream.current = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true
-        });
-
-        console.log("Got local stream:", localStream.current);
-
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = localStream.current;
-        }
-
-        const pc = initializePeerConnection();
-
-        // Add local tracks to peer connection
-        localStream.current.getTracks().forEach(track => {
-          if (localStream.current) {
-            pc.addTrack(track, localStream.current);
-          }
-        });
-
-        // Join room
-        socket.emit("join-room", roomId);
-        setIsConnected(true);
-
-      } catch (err) {
-        console.error("Error in startCall:", err);
-        setError("Failed to start video call. Please check your camera and microphone permissions.");
-      }
-    };
-
-    // Socket event handlers
-    const handleSocketEvents = () => {
-      socket.on("user-joined", async () => {
-        console.log("New user joined - creating offer");
-        try {
-          if (peerConnection.current) {
-            const offer = await peerConnection.current.createOffer();
-            await peerConnection.current.setLocalDescription(offer);
-            socket.emit("offer", { roomId, offer });
-          }
-        } catch (err) {
-          console.error("Error creating offer:", err);
-        }
-      });
-
-      socket.on("offer", async ({ offer }) => {
-        console.log("Received offer - creating answer");
-        try {
-          if (peerConnection.current) {
-            await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
-            const answer = await peerConnection.current.createAnswer();
-            await peerConnection.current.setLocalDescription(answer);
-            socket.emit("answer", { roomId, answer });
-          }
-        } catch (err) {
-          console.error("Error handling offer:", err);
-        }
-      });
-
-      socket.on("answer", async ({ answer }) => {
-        console.log("Received answer");
-        try {
-          if (peerConnection.current) {
-            await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
-          }
-        } catch (err) {
-          console.error("Error handling answer:", err);
-        }
-      });
-
-      // ICE candidate handling
-      peerConnection.current!.onicecandidate = (event) => {
+  
+      peerConnection.current.onicecandidate = (event) => {
         if (event.candidate) {
           socket.emit("ice-candidate", { roomId, candidate: event.candidate });
         }
       };
-
-      socket.on("ice-candidate", async ({ candidate }) => {
-        try {
-          if (peerConnection.current) {
-            await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
-          }
-        } catch (err) {
-          console.error("Error adding ICE candidate:", err);
+  
+      peerConnection.current.ontrack = (event) => {
+        if (remoteVideoRef.current) {
+          remoteVideoRef.current.srcObject = event.streams[0];
         }
-      });
+      };
     };
-
-    startCall().then(() => {
-      handleSocketEvents();
+  
+    const startCall = async () => {
+      try {
+        if (localStream.current) {
+          localStream.current.getTracks().forEach((track) => track.stop());
+        }
+  
+        localStream.current = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+  
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = localStream.current;
+        }
+  
+        initializePeerConnection();
+  
+        localStream.current.getTracks().forEach((track) => {
+          peerConnection.current?.addTrack(track, localStream.current!);
+        });
+  
+        socket.emit("join-room", roomId);
+        setIsConnected(true);
+      } catch (err) {
+        console.error("Error starting call:", err);
+        setError("Failed to access camera/microphone.");
+      }
+    };
+  
+    socket.on("user-joined", async () => {
+      if (peerConnection.current) {
+        const offer = await peerConnection.current.createOffer();
+        await peerConnection.current.setLocalDescription(offer);
+        socket.emit("offer", { roomId, offer });
+      }
     });
-
-    // Cleanup function
+  
+    socket.on("offer", async ({ offer }) => {
+      if (peerConnection.current) {
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+        socket.emit("answer", { roomId, answer });
+      }
+    });
+  
+    socket.on("answer", async ({ answer }) => {
+      if (peerConnection.current) {
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+      }
+    });
+  
+    socket.on("ice-candidate", async ({ candidate }) => {
+      if (peerConnection.current) {
+        await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    });
+  
+    startCall();
+  
     return () => {
       if (localStream.current) {
-        localStream.current.getTracks().forEach(track => track.stop());
+        localStream.current.getTracks().forEach((track) => track.stop());
       }
+  
       if (peerConnection.current) {
         peerConnection.current.close();
       }
+  
+      socket.emit("leave-room", roomId); // Notify the server that the user left
       socket.off("user-joined");
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
     };
   }, [roomId, navigate]);
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
