@@ -1,7 +1,7 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import Meet from "../../components/user/Meet/Meet";
-import CodeEditor from "../../components/user/Meet/codeEditer"
+import CodeEditor from "../../components/user/Meet/CodeEditer"
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from "../../components/ui/resizable";
 
 const InterviewRoom = () => {

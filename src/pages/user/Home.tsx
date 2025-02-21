@@ -5,7 +5,7 @@ import { Button } from "../../components/ui/button"
 function Home() {
   return (
  <>
-    <div className="text-red-600 ">
+    <div>
     <ul className="gap-7  flex justify-end p-3">
     
     <li>Docs</li>
