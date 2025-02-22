@@ -26,13 +26,15 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const fitAddon = useRef<FitAddon>(new FitAddon());
   const terminalInstance = useRef<Terminal | null>(null);
-  const [language, setLanguage] = useState<string>("javascript");
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [peerCount, setPeerCount] = useState<number>(0);
   const [isTerminalMinimized, setIsTerminalMinimized] = useState<boolean>(false);
   const providerRef = useRef<WebrtcProvider | null>(null);
   const docRef = useRef<Y.Doc | null>(null);
   const bindingRef = useRef<MonacoBinding | null>(null);
+  
+  const yLanguage = useRef<Y.Text | null>(null);
+  const yTerminal = useRef<Y.Array<string> | null>(null);
 
   const cleanup = () => {
     if (bindingRef.current) bindingRef.current.destroy();
@@ -50,12 +52,27 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
       signaling: ["ws://localhost:4444"],
       maxConns: 20,
       peerOpts: {
-        config: {
-          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-        },
-      },
+        config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] }
+      }
     });
     providerRef.current = webrtcProvider;
+
+    yLanguage.current = yDoc.getText("language");
+    yTerminal.current = yDoc.getArray("terminal");
+
+    yLanguage.current.observe(() => {
+      const newLang = yLanguage.current?.toString() || "javascript";
+      setLanguage(newLang || "");
+    });
+
+    yTerminal.current.observe(() => {
+      if (terminalInstance.current) {
+        terminalInstance.current.clear();
+        yTerminal.current?.toArray().forEach(line => {
+          terminalInstance.current?.writeln(line);
+        });
+      }
+    });
 
     const updatePeerCount = () => {
       const count = Array.from(webrtcProvider.awareness.getStates().keys()).length - 1;
@@ -76,21 +93,30 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     };
   }, [roomId]);
 
-  const createBinding = (
-    editor: editor.IStandaloneCodeEditor,
-    yDoc: Y.Doc,
-    provider: WebrtcProvider
-  ) => {
+  const [language, setLanguage] = useState<string>("javascript");
+
+  useEffect(() => {
+    if (yLanguage.current) {
+      const observer = () => {
+        const newLang = yLanguage.current?.toString().trim(); // Trim extra spaces
+        if (newLang !== language) {
+          setLanguage(newLang||"");
+        }
+      };
+      yLanguage.current.observe(observer);
+  
+      return () => yLanguage.current?.unobserve(observer);
+    }
+  }, []);
+  
+  
+
+  const createBinding = (editor: editor.IStandaloneCodeEditor, yDoc: Y.Doc, provider: WebrtcProvider) => {
     if (bindingRef.current) bindingRef.current.destroy();
     const yText = yDoc.getText("monaco");
     const monacoModel = editor.getModel();
     if (monacoModel) {
-      bindingRef.current = new MonacoBinding(
-        yText,
-        monacoModel,
-        new Set([editor]),
-        provider.awareness
-      );
+      bindingRef.current = new MonacoBinding(yText, monacoModel, new Set([editor]), provider.awareness);
     }
   };
 
@@ -105,38 +131,15 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     if (!terminalRef.current) return;
 
     terminalInstance.current = new Terminal({
-      theme: {
-        background: '#1e1e1e',
-        foreground: '#d4d4d4',
-        cursor: '#d4d4d4',
-        black: '#1e1e1e',
-        brightBlack: '#808080',
-        red: '#f44747',
-        brightRed: '#f44747',
-        green: '#608b4e',
-        brightGreen: '#608b4e',
-        yellow: '#dcdcaa',
-        brightYellow: '#dcdcaa',
-        blue: '#569cd6',
-        brightBlue: '#569cd6',
-        magenta: '#c678dd',
-        brightMagenta: '#c678dd',
-        cyan: '#56b6c2',
-        brightCyan: '#56b6c2',
-        white: '#d4d4d4',
-        brightWhite: '#d4d4d4'
-      },
-      fontFamily: 'Consolas, "Courier New", monospace',
+      theme: { background: "#1e1e1e", foreground: "#d4d4d4", cursor: "#d4d4d4" },
       fontSize: 14,
-      lineHeight: 1.2,
-      cursorBlink: true,
-      cursorStyle: 'block',
+      cursorBlink: true
     });
-    
+
     terminalInstance.current.loadAddon(fitAddon.current);
     terminalInstance.current.open(terminalRef.current);
     fitAddon.current.fit();
-    terminalInstance.current.writeln('Terminal ready\r\n');
+    terminalInstance.current.writeln("Terminal ready\r\n");
 
     return () => {
       terminalInstance.current?.dispose();
@@ -150,98 +153,63 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     terminalInstance.current.clear();
     terminalInstance.current.writeln(`[${new Date().toLocaleTimeString()}] Running ${language.toUpperCase()} code...\r\n`);
 
+    if (yTerminal.current) {
+      yTerminal.current.push([`[${new Date().toLocaleTimeString()}] Running ${language.toUpperCase()} code...`]);
+    }
+
     try {
-      const response = await fetch("http://localhost:5000/execute", {
+      const response = await fetch("http://localhost:5000/meet/compile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code }),
+        body: JSON.stringify({ language, code })
       });
       const data = await response.json();
       terminalInstance.current.writeln(data.output || "Execution error");
+
+      if (yTerminal.current) {
+        yTerminal.current.push([data.output || "Execution error"]);
+      }
     } catch (err) {
-      terminalInstance.current.writeln("\r\nError executing code");
+      terminalInstance.current.writeln("Error executing code");
+      if (yTerminal.current) {
+        yTerminal.current.push(["Error executing code"]);
+      }
     }
   };
 
-  const currentLang = languages.find(lang => lang.id === language);
-  const fileName = `main${currentLang?.ext || '.js'}`;
-
   return (
     <div className="flex flex-col h-full bg-[#1e1e1e] text-gray-300">
-      {/* Top Bar */}
       <div className="bg-[#252526] px-4 py-2 flex items-center justify-between border-b border-[#3d3d3d]">
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm">{fileName}</span>
-            {isConnected && (
-              <div className="flex items-center text-xs text-gray-400">
-                <Users size={14} className="mr-1" />
-                <span>{peerCount} connected</span>
-              </div>
-            )}
-          </div>
+          <span className="text-sm">{`main.${language}`}</span>
+          {isConnected && (
+            <div className="flex items-center text-xs text-gray-400">
+              <Users size={14} className="mr-1" />
+              <span>{peerCount} connected</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-3">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="bg-[#3d3d3d] text-sm px-2 py-1 rounded border border-[#4d4d4d] focus:outline-none focus:border-[#007acc]"
-          >
+          <select value={language} onChange={(e) => setLanguage(e.target.value)} className="bg-[#3d3d3d] text-sm px-2 py-1 rounded">
             {languages.map((lang) => (
-              <option key={lang.id} value={lang.id}>
-                {lang.name}
-              </option>
+              <option key={lang.id} value={lang.id}>{lang.name}</option>
             ))}
           </select>
-          <button
-            onClick={runCode}
-            className="flex items-center space-x-1 bg-[#4d4d4d] hover:bg-[#5d5d5d] px-3 py-1 rounded text-sm"
-          >
+          <button onClick={runCode} className="flex items-center space-x-1 bg-[#4d4d4d] px-3 py-1 rounded">
             <Play size={14} />
             <span>Run</span>
           </button>
         </div>
       </div>
 
-      {/* Editor */}
-      <div className="flex-1">
-        <Editor
-          height="100%"
-          language={language}
-          defaultValue="// Start coding..."
-          onMount={handleEditorDidMount}
-          theme="vs-dark"
-          options={{
-            fontSize: 14,
-            minimap: { enabled: true },
-            automaticLayout: true,
-            wordWrap: "on",
-            padding: { top: 10 },
-            scrollBeyondLastLine: false,
-          }}
-        />
-      </div>
+      <Editor height="100%" language={language} defaultValue="// Start coding..." onMount={handleEditorDidMount} theme="vs-dark" />
 
-      {/* Terminal */}
       <div className="border-t border-[#3d3d3d]">
         <div className="bg-[#252526] px-4 py-1 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Cpu size={14} />
-            <span className="text-sm">Terminal</span>
-          </div>
-          <button
-            onClick={() => setIsTerminalMinimized(!isTerminalMinimized)}
-            className="hover:bg-[#3d3d3d] p-1 rounded"
-          >
-            <X size={14} />
-          </button>
+          <Cpu size={14} />
+          <button onClick={() => setIsTerminalMinimized(!isTerminalMinimized)}><X size={14} /></button>
         </div>
-        <div
-          ref={terminalRef}
-          className={`bg-[#1e1e1e] transition-all duration-200 ${
-            isTerminalMinimized ? 'h-0' : 'h-64'
-          }`}
-        />
+        <div ref={terminalRef} className={isTerminalMinimized ? "h-0" : "h-64"} />
       </div>
     </div>
   );
