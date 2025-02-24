@@ -100,7 +100,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     }
   }, []);
   
-
   const handleLanguageChange = (newLanguage: string) => {
     setLanguage(newLanguage);
     if (yLanguage.current) {
@@ -135,9 +134,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
       autoClosingBrackets: "always",
       autoClosingQuotes: "always",
       acceptSuggestionOnEnter: "smart",
+      
     });
     
-
     editor.addAction({
       id: 'format-code',
       label: 'Format Code',
@@ -157,8 +156,15 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     }
   };
 
-  useEffect(() => {
+  // Initialize terminal when component mounts
+  const initializeTerminal = () => {
     if (!terminalRef.current) return;
+
+    // If terminal already exists, dispose it properly
+    if (terminalInstance.current) {
+      terminalInstance.current.dispose();
+      terminalInstance.current = null;
+    }
 
     terminalInstance.current = new Terminal({
       theme: { 
@@ -193,49 +199,89 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
 
     terminalInstance.current.loadAddon(fitAddon.current);
     terminalInstance.current.open(terminalRef.current);
-    fitAddon.current.fit();
-    terminalInstance.current.writeln("Terminal ready\r\n");
-  
-    return () => {
-      terminalInstance.current?.dispose();
-    };
-  }, []);
-  
-  // Add the Yjs terminal observer here
-  useEffect(() => {
-    if (yTerminal.current && terminalInstance.current) {
-      const terminalObserver = () => {
-        if (yTerminal.current) {
-          const outputMessages = yTerminal.current.toArray();
-          terminalInstance.current?.clear();
-          outputMessages.forEach((message) => {
-            // Split the message by newline and write each line separately.
-            message.split(/\r?\n/).forEach((line) => {
-              terminalInstance.current?.writeln(line);
-            });
-          });
-        }
-      };
-  
-      yTerminal.current.observe(terminalObserver);
-      return () => {
-        yTerminal.current?.unobserve(terminalObserver);
-      };
+    
+    // Force fit the terminal after a brief delay to ensure container dimensions are stable
+    setTimeout(() => {
+      if (terminalInstance.current) {
+        fitAddon.current.fit();
+        terminalInstance.current.focus();
+      }
+    }, 100);
+    
+    // Display current terminal content if available
+    if (yTerminal.current && yTerminal.current.length > 0) {
+      const messages = yTerminal.current.toArray();
+      messages.forEach(message => {
+        message.split(/\r?\n/).forEach(line => {
+          terminalInstance.current?.writeln(line);
+        });
+      });
+    } else {
+      terminalInstance.current.writeln("Terminal ready\r\n");
     }
+  };
+
+  // Handle resizing
+  useEffect(() => {
+    const handleResize = () => {
+      if (!isTerminalMinimized && terminalInstance.current) {
+        fitAddon.current.fit();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isTerminalMinimized]);
+
+  // Effect for initializing terminal when it's visible
+  useEffect(() => {
+    if (!isTerminalMinimized) {
+      // Small delay to ensure the DOM is ready
+      const timer = setTimeout(() => {
+        initializeTerminal();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    } else if (terminalInstance.current) {
+      terminalInstance.current.dispose();
+      terminalInstance.current = null;
+    }
+  }, [isTerminalMinimized]);
+  
+  // Add the Yjs terminal observer
+  useEffect(() => {
+    if (!yTerminal.current) return;
+    
+    const terminalObserver = () => {
+      if (yTerminal.current && terminalInstance.current) {
+        const outputMessages = yTerminal.current.toArray();
+        terminalInstance.current.clear();
+        outputMessages.forEach((message) => {
+          message.split(/\r?\n/).forEach((line) => {
+            terminalInstance.current?.writeln(line);
+          });
+        });
+      }
+    };
+
+    yTerminal.current.observe(terminalObserver);
+    return () => {
+      yTerminal.current?.unobserve(terminalObserver);
+    };
   }, []);
   
   const runCode = async () => {
     const code = editorRef.current?.getValue();
-    if (!code || !terminalInstance.current || !yTerminal.current) return;
+    if (!code || !yTerminal.current) return;
   
     // Prepare a local array to accumulate messages
     const messages: string[] = [];
     const timestamp = new Date().toLocaleTimeString();
-    const runMessage = `[${timestamp}] Running ${language.toUpperCase()} code...\r\n`;
+    const currentLang = languages.find(lang => lang.id === language);
+    const runMessage = `[${timestamp}] Running ${currentLang?.name || language.toUpperCase()} code...\r\n`;
     messages.push(runMessage);
   
     try {
-      const currentLang = languages.find(lang => lang.id === language);
       const languageId = currentLang?.judge0Id || 63; // Default to Node.js if not found
   
       const response = await fetch("http://localhost:5000/api/meet/compile", {
@@ -278,9 +324,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
       yTerminal.current!.delete(0, yTerminal.current!.length);
       yTerminal.current!.push(messages);
     });
+
+    // Make sure the terminal is open
+    if (isTerminalMinimized) {
+      setIsTerminalMinimized(false);
+    }
   };
-  
-  
 
   return (
     <div className="flex flex-col h-full bg-[#1e1e1e] text-gray-300">
@@ -314,50 +363,51 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
         </div>
       </div>
 
-      <Editor
-        height="100%"
-        language={language}
-        defaultValue="// Start coding..."
-        onMount={handleEditorDidMount}
-        theme="vs-dark"
-        options={{
-          automaticLayout: true,
-          fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-          fontSize: 14
-        }}
-      />
-
-<div className="border-t border-[#3d3d3d]">
-  {isTerminalMinimized ? (
-    // When minimized, show a button to open the terminal.
-    <button 
-      onClick={() => setIsTerminalMinimized(false)}
-      className="w-full bg-[#252526] text-gray-300 px-4 py-2 text-sm hover:bg-[#3d3d3d] transition-colors"
-    >
-      Open Terminal
-    </button>
-  ) : (
-    <>
-      <div className="bg-[#252526] px-4 py-1 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Cpu size={14} />
-          <span className="text-xs">Terminal</span>
-        </div>
-        <button 
-          onClick={() => setIsTerminalMinimized(true)}
-          className="hover:bg-[#3d3d3d] p-1 rounded transition-colors"
-        >
-          <X size={14} />
-        </button>
+      <div className="flex-grow overflow-hidden">
+        <Editor
+          height="100%"
+          language={language}
+          defaultValue="// Start coding..."
+          onMount={handleEditorDidMount}
+          theme="vs-dark"
+          options={{
+            automaticLayout: true,
+            fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+            fontSize: 14
+          }}
+        />
       </div>
-      <div 
-        ref={terminalRef} 
-        className="transition-all duration-200 h-64" 
-      />
-    </>
-  )}
-</div>
 
+      <div className="border-t border-[#3d3d3d]">
+        {isTerminalMinimized ? (
+          <button 
+            onClick={() => setIsTerminalMinimized(false)}
+            className="w-full bg-[#252526] text-gray-300 px-4 py-2 text-sm hover:bg-[#3d3d3d] transition-colors"
+          >
+            Open Terminal
+          </button>
+        ) : (
+          <div className="flex flex-col">
+            <div className="bg-[#252526] px-4 py-1 flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Cpu size={14} />
+                <span className="text-xs">Terminal</span>
+              </div>
+              <button 
+                onClick={() => setIsTerminalMinimized(true)}
+                className="hover:bg-[#3d3d3d] p-1 rounded transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div 
+              ref={terminalRef} 
+              className="h-64 w-full"
+              style={{ minHeight: "200px" }}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
