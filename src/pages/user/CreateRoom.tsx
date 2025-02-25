@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 import { Card, CardContent, CardFooter, CardHeader } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Mail, Video, Copy, Check, ArrowLeft } from "lucide-react";
+import { selectCompanyName } from '../../service/redux/store';
+import { useSelector } from 'react-redux';
 
 const CreateRoom = () => {
   const [roomId, setRoomId] = useState("");
@@ -12,13 +14,24 @@ const CreateRoom = () => {
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [candidate, setCandidate] = useState(null);
-  const [jobDetails, setJobDetails] = useState(null);
+  interface Candidate {
+    email: string;
+    fullName: string;
+  }
+  
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  interface JobDetails {
+    jobTitle: string;
+  }
+  
+  const [jobDetails, setJobDetails] = useState<JobDetails | null>(null);
   const [interviewDate, setInterviewDate] = useState("");
   const [interviewTime, setInterviewTime] = useState("");
   
   const navigate = useNavigate();
   const location = useLocation();
+  const companyName = useSelector(selectCompanyName);
+console.log(companyName);
 
   useEffect(() => {
     // Get candidate data from location state (passed when navigating to this page)
@@ -44,6 +57,7 @@ const CreateRoom = () => {
     // Generate the full meeting URL
     const baseUrl = window.location.origin;
     const newMeetingUrl = `${baseUrl}/meet/${newRoomId}`;
+    console.info("Meeting URL:", newMeetingUrl);
     setMeetingUrl(newMeetingUrl);
     
     // Automatically send email to candidate
@@ -56,35 +70,36 @@ const CreateRoom = () => {
     }
   };
 
-  const sendEmailToCandidate = async (roomId, meetingUrl) => {
+  const sendEmailToCandidate = async (roomId: string, meetingUrl: string) => {
     try {
-      // Send email via backend API
-      const response = await axios.post('/api/interviews/send-meeting-invite', {
-        candidateEmail: candidate.email,
-        candidateName: candidate.fullName,
-        meetingUrl: meetingUrl,
-        roomId: roomId,
-        jobTitle: jobDetails?.jobTitle || "",
-        interviewDate: interviewDate,
-        interviewTime: interviewTime
-      });
-      
-      if (response.status === 200) {
-        setEmailSent(true);
-        setTimeout(() => setEmailSent(false), 3000);
-      }
+        const response = await axios.post('http://localhost:5000/api/meet/send-meeting-invite', {
+            candidateEmail: candidate?.email || "",
+            candidateName: candidate?.fullName || "",
+            meetingUrl: meetingUrl,
+            roomId: roomId,
+            jobTitle: jobDetails?.jobTitle || "",
+            interviewDate: interviewDate,
+            interviewTime: interviewTime,
+            companyName
+        });
+
+        if (response.status === 200) {
+            setEmailSent(true);
+            setTimeout(() => setEmailSent(false), 3000);
+        }
     } catch (error) {
-      console.error('Failed to send email:', error);
-      throw error;
+        console.error('Failed to send email:', error);
+        throw error;
     }
-  };
+};
+
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(meetingUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
+ 
   const joinMeeting = () => {
     if (roomId) {
       navigate(`/meet/${roomId}`);
