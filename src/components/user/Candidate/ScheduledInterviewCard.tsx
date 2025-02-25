@@ -13,16 +13,19 @@ import {
   Linkedin,
   Video
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const InterviewCard = ({ interviewData }:any) => {
-    const { candidate, selectionStatus, meetUrl, date, time, job } = interviewData;
+    const { candidate, selectionStatus, date, time, job } = interviewData;
+    const navigate = useNavigate();
   
     const handleMeetingJoin = () => {
-      if (meetUrl) {
-        window.open(meetUrl, '_blank');
-      }
+      // Instead of opening in a new tab, navigate with the interview data
+      navigate("/create-room", { 
+        state: { interviewData: { candidate, job, date, time } } 
+      });
     };
-  
+    
     const handleLinkedIn = () => {
       if (candidate.linkedin) {
         window.open(candidate.linkedin, '_blank');
@@ -125,14 +128,14 @@ const InterviewCard = ({ interviewData }:any) => {
               View Resume
             </Button>
           </div>
-          
+        
           <Button 
             variant="default" 
             className="w-full bg-green-600 hover:bg-green-700 flex items-center justify-center"
             onClick={handleMeetingJoin}
           >
             <Video className="w-4 h-4 mr-2" />
-            {'Join Meeting'}
+            {'Schedule Interview'}
           </Button>
         </CardFooter>
       </Card>
