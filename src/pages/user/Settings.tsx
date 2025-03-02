@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Menu, X, Key, LogOut } from "lucide-react";
+import { Menu, X, Key, LogOut, CreditCard } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import {
   Card,
@@ -7,39 +7,76 @@ import {
   CardTitle,
   CardContent,
   CardDescription,
+  CardFooter,
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../service/redux/authSlice";
 import { useToast } from "../../@/hooks/use-toast";
 import { selectUserId } from "../../service/redux/store";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { generateApi, fetchSettingsData } from "../../service/Api/settingsApi";
+import { generateApi, fetchSettingsData, purchaseTokens } from "../../service/Api/settingsApi";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
+import { Progress } from "../../components/ui/progress";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("api");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [purchaseAmount, setPurchaseAmount] = useState("1000");
+  const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
   const userId = useSelector(selectUserId);
   const queryClient = useQueryClient();
 
-  const { data: apiKey, isLoading: isApiKeyLoading } = useQuery({
-    queryKey: ["apiKey"],
+  const { data: settingsData, isLoading: isSettingsLoading } = useQuery({
+    queryKey: ["settings"],
     queryFn: () => fetchSettingsData(userId),
     enabled: !!userId, // Only fetch if userId is available
   });
 
-  const mutation = useMutation({
+  const tokenPurchaseMutation = useMutation({
+    mutationFn: (amount: number) => purchaseTokens(userId, amount),
+    onSuccess: (_, amount) => {
+      toast({ description: `Successfully purchased ${amount} tokens!` });
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
+      setIsPurchaseDialogOpen(false);
+    },
+    onError: () => {
+      toast({
+        description: "Failed to complete token purchase.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+
+  const apiKeyMutation = useMutation({
     mutationFn: () => generateApi(userId),
     onSuccess: (data) => {
       toast({ description: "API Key regenerated successfully!" });
-      queryClient.invalidateQueries({ queryKey: ["apiKey"] });
+      queryClient.invalidateQueries({ queryKey: ["settings"] });
     },
     onError: () => {
       toast({
@@ -51,6 +88,7 @@ const Settings = () => {
 
   const sidebarLinks = [
     { title: "API Settings", href: "#api", icon: Key },
+    { title: "Tokens", href: "#tokens", icon: CreditCard },
     { title: "Logout", href: "#logout", icon: LogOut },
   ];
 
@@ -67,6 +105,10 @@ const Settings = () => {
 
   const toggleVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
+  };
+
+  const handlePurchaseTokens = () => {
+    tokenPurchaseMutation.mutate(Number(purchaseAmount));
   };
 
   const SidebarContent = () => (
@@ -109,12 +151,12 @@ const Settings = () => {
                   <Input
                     id="apiKey"
                     type={isPasswordVisible ? "text" : "password"}
-                    value={isApiKeyLoading ? "Loading..." : apiKey.apiKey || ""}
+                    value={isSettingsLoading ? "Loading..." : settingsData?.apiKey || ""}
                     readOnly
                     className="font-mono"
                     onClick={() => {
-                      if (!isApiKeyLoading && apiKey) {
-                        navigator.clipboard.writeText(apiKey.apiKey);
+                      if (!isSettingsLoading && settingsData?.apiKey) {
+                        navigator.clipboard.writeText(settingsData.apiKey);
                         toast({ description: "Copied to clipboard" });
                       }
                     }}
@@ -122,7 +164,7 @@ const Settings = () => {
                   <Button onClick={toggleVisibility} className="text-xs">
                     {isPasswordVisible ? "Hide" : "Show"}
                   </Button>
-                  <Button onClick={() => mutation.mutate()}>
+                  <Button onClick={() => apiKeyMutation.mutate()}>
                     Regenerate
                   </Button>
                 </div>
@@ -145,6 +187,61 @@ const Settings = () => {
                 </div>
               </div>
             </CardContent>
+          </Card>
+        );
+
+      case "tokens":
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Token Management</CardTitle>
+              <CardDescription>View and purchase API tokens</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Remaining Tokens</Label>
+                  <span className="font-semibold text-lg">
+                    {isSettingsLoading ? "Loading..." : `${settingsData?.token || 0} tokens`}
+                  </span>
+                </div>
+                <Progress 
+                  value={isSettingsLoading ? 0 :  Math.min((settingsData?.token || 0) / 2000 * 100, 100)} 
+                  className="h-2"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Usage level: {isSettingsLoading ? "Calculating..." : 
+                    (settingsData?.token || 0) > 1000 ? "Good" : 
+                    (settingsData?.token || 0) > 500 ? "Moderate" : "Low"}
+                </p>
+              </div>
+              <Separator />
+              <div className="space-y-2">
+                <Label>Purchase Tokens</Label>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="flex space-x-2">
+                    <Select defaultValue={purchaseAmount} onValueChange={setPurchaseAmount}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select amount" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1000">1,000 tokens ($10)</SelectItem>
+                        <SelectItem value="5000">3,000 tokens ($45)</SelectItem>
+                        <SelectItem value="10000">5,000 tokens ($80)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button onClick={() => setIsPurchaseDialogOpen(true)}>
+                      Purchase
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col items-start">
+              <p className="text-sm text-muted-foreground">
+                Tokens are consumed each time you make an API request. They don't expire, so you can use them at your own pace.
+              </p>
+            </CardFooter>
           </Card>
         );
 
@@ -213,6 +310,28 @@ const Settings = () => {
           <div className="mx-auto max-w-3xl">{renderContent()}</div>
         </main>
       </div>
+
+      {/* Purchase Confirmation Dialog */}
+      <AlertDialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Purchase</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to purchase {Number(purchaseAmount).toLocaleString()} tokens for $
+              {purchaseAmount === "1000" ? "10" : 
+                purchaseAmount === "5000" ? "45" : 
+                purchaseAmount === "10000" ? "80" : "350"}.
+              This action will be charged to your account's payment method.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handlePurchaseTokens}>
+              Confirm Purchase
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
