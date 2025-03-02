@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Badge } from "../../ui/badge";
 import { TracingBeam } from "../../ui/tracing-beam";
 import { useInView } from "react-intersection-observer";
-
+import web_octaview from '../../../assets/web_octaview.png'
 const LandingPage = () => {
   const [billingPeriod, setBillingPeriod] = useState("monthly");
   
@@ -84,46 +84,37 @@ const LandingPage = () => {
     {
       name: "Starter",
       description: "Perfect for small teams and startups",
-      price: billingPeriod === "monthly" ? "$50" : "$45",
-      period: billingPeriod === "monthly" ? "month" : "month (billed annually)",
+      price:  "$50",
       tokens: "1,000 tokens",
       features: [
-        "Basic AI interview assistant",
-        "Collaborative code editor",
-        "Video interviews",
-        "Email notifications",
-        "24/7 support"
+        "Custom branding",
+        "Advanced analytics",
+        "Dedicated account manager",
+        "Custom API integration"
       ],
       highlighted: false
     },
     {
       name: "Professional",
       description: "For growing companies with regular hiring needs",
-      price: billingPeriod === "monthly" ? "$125" : "$112",
-      period: billingPeriod === "monthly" ? "month" : "month (billed annually)",
+      price:  "$125" ,
       tokens: "3,000 tokens",
       features: [
-        "Advanced AI interview assistant",
-        "Code execution environment",
-        "Custom interview templates",
-        "API access",
-        "Analytics dashboard",
-        "Priority support"
+        "Custom branding",
+        "Advanced analytics",
+        "Dedicated account manager",
+        "Custom API integration"
       ],
       highlighted: true
     },
     {
       name: "Enterprise",
       description: "For large organizations with high-volume hiring",
-      price: billingPeriod === "monthly" ? "$200" : "$180",
-      period: billingPeriod === "monthly" ? "month" : "month (billed annually)",
+      price:  "$200",
       tokens: "5,000 tokens",
       features: [
-        "Premium AI interview assistant",
-        "Unlimited interviews",
         "Custom branding",
         "Advanced analytics",
-        "SSO integration",
         "Dedicated account manager",
         "Custom API integration"
       ],
@@ -260,7 +251,7 @@ const LandingPage = () => {
                   </div>
                   <div className="p-2">
                     <img 
-                      src="https://www.bootstrapdash.com/wp-content/uploads/2022/03/screencapture-bootstrapdash-demo-purple-jquery-template-demo-1-2022-03-04-09_46_51-1.png" 
+                      src={web_octaview}
                       alt="Octaview Interface" 
                       className="w-full h-full object-cover rounded-lg"
                     />
@@ -358,19 +349,7 @@ const LandingPage = () => {
               Transparent pricing with all the features you need to streamline your technical hiring process.
             </p>
             
-            <div className="mt-8 flex justify-center">
-              <Tabs 
-                defaultValue="monthly" 
-                value={billingPeriod}
-                onValueChange={setBillingPeriod}
-                className="bg-white rounded-lg p-1 border shadow-sm"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                  <TabsTrigger value="annual">Annual (10% off)</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+  
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -402,7 +381,7 @@ const LandingPage = () => {
                     <div className="mb-6">
                       <div className="flex items-baseline">
                         <span className="text-4xl font-bold">{plan.price}</span>
-                        <span className="text-gray-500 ml-2">/{plan.period}</span>
+        
                       </div>
                       <div className="mt-1 flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-amber-500" />
