@@ -6,12 +6,6 @@ import LandingPage from "../../components/user/home-login/LandingBody"
 function Home() {
   return (
  <>
-    <div>
-    <ul className="gap-7  flex justify-end p-3">
-    
-    <li>Docs</li>
-    </ul>
-    </div>
     <Navbar/>
     <LandingPage/>
  </>

@@ -1,87 +1,174 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "../../../lib/utils";
 import { useNavigate, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Menu, 
+  X, 
+  ChevronDown,
+  ExternalLink,
+  LogIn,
+  Bot,
+  Code2,
+  Sparkles
+} from "lucide-react";
+import { Button } from "../../ui/button";
+
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+
+  // Handle scroll effect for navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      if (offset > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const login = () => {
     navigate('/login');
-  }
+  };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50">
-      {/* Navbar Background with Blur */}
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-lg" /> {/* Removed dark mode class here */}
-
-      {/* Navbar Content */}
-      <div className="relative mx-auto max-w-7xl px-4">
-        <div className="flex items-center justify-between h-16">
+    <div 
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        scrolled 
+          ? "bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 py-3" 
+          : "bg-transparent py-5"
+      )}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center">
-            <a 
-              href="/" 
-              className="text-xl font-bold text-black" 
-            >
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="relative h-9 w-9 overflow-hidden rounded-full bg-black flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <span className={cn(
+              "text-2xl font-bold transition-colors duration-300",
+              scrolled ? "text-gray-800" : "text-gray-900"
+            )}>
               Octaview
-            </a>
-          </div>
+            </span>
+          </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link to={'/docs'}>
-              <a className="text-sm text-gray-600 hover:text-black transition-colors">Docs</a>
-            </Link>
-            <button  
+          <div className="hidden md:flex items-center space-x-1">
+            
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/pricing">Pricing</Link>
+            </Button>
+            
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/docs" className="flex items-center space-x-1">
+                <span>Docs</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+            
+            <div className="mx-1 h-5 border-r border-gray-300" />
+            
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="text-gray-700 hover:text-gray-900"
               onClick={login}
-              className="px-4 py-2 text-sm text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
             >
               Login
-            </button>
+            </Button>
+            
+            <Button 
+              size="sm" 
+              className="bg-black text-white hover:bg-gray-800"
+              onClick={() => navigate('/signup')}
+            >
+              Get Started
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
+          <Button 
+            variant="ghost" 
+            size="sm"
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 text-gray-600 hover:text-black"
+            className="md:hidden flex items-center justify-center"
+            aria-label="Toggle menu"
           >
             {isOpen ? (
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="h-5 w-5" />
             ) : (
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="h-5 w-5" />
             )}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={cn(
-            "absolute top-16 left-0 right-0 bg-white border-b border-gray-200 md:hidden transition-all duration-300 ease-in-out",
-            isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
-          )}
-        >
-          <div className="flex flex-col space-y-4 px-4 py-6">
-            <a
-              href="/docs"
-              className="text-sm text-gray-600 hover:text-black transition-colors"
-            >
-              Docs
-            </a>
-
-            <button onClick={login}
-              className="px-4 py-2 text-sm text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              Login
-            </button>
-          </div>
+          </Button>
         </div>
       </div>
-    </nav>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden border-t border-gray-200 bg-white"
+          >
+            <div className="py-2 px-4 space-y-1">
+             
+              <Link 
+                to="/pricing" 
+                className="block py-2 px-3 rounded-md hover:bg-gray-100 font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Pricing
+              </Link>
+              <Link 
+                to="/docs" 
+                className="block py-2 px-3 rounded-md hover:bg-gray-100 font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Docs
+              </Link>
+              <div className="py-2 border-t border-gray-100">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start py-2 px-3 rounded-md hover:bg-gray-100 font-medium"
+                  onClick={() => {
+                    login();
+                    setIsOpen(false);
+                  }}
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+                <Button 
+                  className="w-full mt-2 bg-black text-white hover:bg-gray-800"
+                  onClick={() => {
+                    navigate('/signup');
+                    setIsOpen(false);
+                  }}
+                >
+                  Get Started
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

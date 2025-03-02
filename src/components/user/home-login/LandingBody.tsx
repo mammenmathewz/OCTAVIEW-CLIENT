@@ -1,5 +1,5 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../../lib/utils";
 import { Button } from "../../ui/button";
 import { 
@@ -10,20 +10,38 @@ import {
   ArrowRight, 
   Bot, 
   Globe, 
-  Calendar 
+  Calendar,
+  Check,
+  Sparkles
 } from "lucide-react";
 import { BackgroundBeams } from "../../ui/backgroundBeams";
 import { SparklesCore } from "../../ui/sparkles";
 import { TextGenerateEffect } from "../../ui/text-generate-effect";
+import { HoverEffect } from "../../ui/card-hover-effect";
+import { 
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from "../../ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import { Badge } from "../../ui/badge";
+import { TracingBeam } from "../../ui/tracing-beam";
+import { useInView } from "react-intersection-observer";
 
 const LandingPage = () => {
+  const [billingPeriod, setBillingPeriod] = useState("monthly");
+  
   const features = [
     {
       title: "AI-Powered Interviews",
       description: "Automate screening with generative AI that adapts to your company culture",
       icon: <Bot className="h-6 w-6" />,
       color: "bg-blue-500/10",
-      textColor: "text-blue-500"
+      textColor: "text-blue-500",
+      link: "#ai-interviews"
     },
     {
       title: "Collaborative Code Editor",
@@ -62,30 +80,91 @@ const LandingPage = () => {
     }
   ];
 
+  const pricingPlans = [
+    {
+      name: "Starter",
+      description: "Perfect for small teams and startups",
+      price: billingPeriod === "monthly" ? "$50" : "$45",
+      period: billingPeriod === "monthly" ? "month" : "month (billed annually)",
+      tokens: "1,000 tokens",
+      features: [
+        "Basic AI interview assistant",
+        "Collaborative code editor",
+        "Video interviews",
+        "Email notifications",
+        "24/7 support"
+      ],
+      highlighted: false
+    },
+    {
+      name: "Professional",
+      description: "For growing companies with regular hiring needs",
+      price: billingPeriod === "monthly" ? "$125" : "$112",
+      period: billingPeriod === "monthly" ? "month" : "month (billed annually)",
+      tokens: "3,000 tokens",
+      features: [
+        "Advanced AI interview assistant",
+        "Code execution environment",
+        "Custom interview templates",
+        "API access",
+        "Analytics dashboard",
+        "Priority support"
+      ],
+      highlighted: true
+    },
+    {
+      name: "Enterprise",
+      description: "For large organizations with high-volume hiring",
+      price: billingPeriod === "monthly" ? "$200" : "$180",
+      period: billingPeriod === "monthly" ? "month" : "month (billed annually)",
+      tokens: "5,000 tokens",
+      features: [
+        "Premium AI interview assistant",
+        "Unlimited interviews",
+        "Custom branding",
+        "Advanced analytics",
+        "SSO integration",
+        "Dedicated account manager",
+        "Custom API integration"
+      ],
+      highlighted: false
+    }
+  ];
+
+  // For the floating elements in the hero section
+  const [ref, inView] = useInView({
+    triggerOnce: false,
+    threshold: 0.1,
+  });
+
   return (
-    <div className="relative w-full overflow-hidden">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-40 md:pb-24">
-        <BackgroundBeams className="opacity-20" />
+    <div className="relative w-full overflow-hidden bg-white">
+      {/* Hero Section with Enhanced Animations */}
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
+        <BackgroundBeams className="opacity-30" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="relative h-20 w-full"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ 
+                duration: 0.7,
+                type: "spring",
+                stiffness: 100
+              }}
+              className="relative h-24 w-full"
             >
               <SparklesCore
                 id="tsparticles"
                 background="transparent"
                 minSize={0.6}
-                maxSize={1.4}
-                particleDensity={100}
+                maxSize={1.8}
+                particleDensity={120}
                 className="w-full h-full"
-                particleColor="#000000"
+                particleColor="#4f46e5"
               />
-              <h1 className="absolute inset-0 flex items-center justify-center text-5xl md:text-6xl font-bold tracking-tight">
+              <h1 className="absolute inset-0 flex items-center justify-center text-6xl md:text-7xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
                 Octaview
               </h1>
             </motion.div>
@@ -93,68 +172,112 @@ const LandingPage = () => {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
+              transition={{ delay: 0.3, duration: 0.7 }}
               className="mt-6 max-w-3xl mx-auto"
             >
               <TextGenerateEffect
                 words="Revolutionize your technical hiring with AI-powered interviews"
-                className="text-xl md:text-2xl text-gray-600 leading-relaxed"
+                className="text-xl md:text-2xl text-gray-700 leading-relaxed font-medium"
               />
             </motion.div>
             
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="mt-10 flex flex-col sm:flex-row gap-5 justify-center"
             >
-              <Button className="bg-black text-white hover:bg-gray-800 px-8 py-6 text-base rounded-xl">
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 px-8 py-6 text-base font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group">
                 Get Started
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button variant="outline" className="border-black text-black hover:bg-gray-100 px-8 py-6 text-base rounded-xl">
+              <Button variant="outline" className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-6 text-base font-medium rounded-xl group">
                 Watch Demo
-                <Video className="ml-2 h-5 w-5" />
+                <Video className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
               </Button>
             </motion.div>
           </div>
           
-          {/* Hero Mockup */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.7 }}
-            className="mt-16 relative mx-auto max-w-5xl"
-          >
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-20" />
-              <div className="relative rounded-2xl border border-gray-200 bg-white/80 backdrop-blur-sm shadow-xl overflow-hidden">
-                <div className="h-12 bg-gray-50 border-b border-gray-200 flex items-center px-4">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-red-400" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <div className="w-3 h-3 rounded-full bg-green-400" />
+          {/* Enhanced Hero Mockup with Floating Elements */}
+          <div ref={ref} className="mt-20 relative mx-auto max-w-5xl">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="relative"
+            >
+              {/* Decorative floating elements */}
+              <AnimatePresence>
+                {inView && (
+                  <>
+                    <motion.div 
+                      initial={{ opacity: 0, x: -30, y: -20 }}
+                      animate={{ opacity: 1, x: 0, y: 0 }}
+                      transition={{ delay: 1.2, duration: 0.8 }}
+                      className="absolute -left-8 -top-16 z-10"
+                    >
+                      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                        <Bot className="h-6 w-6 text-blue-500" />
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div 
+                      initial={{ opacity: 0, x: 30, y: -10 }}
+                      animate={{ opacity: 1, x: 0, y: 0 }}
+                      transition={{ delay: 1.4, duration: 0.8 }}
+                      className="absolute -right-4 -top-10 z-10"
+                    >
+                      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                        <Code2 className="h-6 w-6 text-purple-500" />
+                      </div>
+                    </motion.div>
+                    
+                    <motion.div 
+                      initial={{ opacity: 0, x: 20, y: 20 }}
+                      animate={{ opacity: 1, x: 0, y: 0 }}
+                      transition={{ delay: 1.6, duration: 0.8 }}
+                      className="absolute right-12 -bottom-8 z-10"
+                    >
+                      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+                        <Video className="h-6 w-6 text-amber-500" />
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+
+              {/* Main mockup */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur-2xl opacity-20" />
+                <div className="relative rounded-2xl border border-gray-200 bg-white/90 backdrop-blur-sm shadow-2xl overflow-hidden">
+                  <div className="h-12 bg-gray-50 border-b border-gray-200 flex items-center px-4">
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-red-400" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                      <div className="w-3 h-3 rounded-full bg-green-400" />
+                    </div>
+                    <div className="mx-auto pr-10 text-sm text-gray-500">Octaview Interview Session</div>
                   </div>
-                  <div className="mx-auto pr-10 text-sm text-gray-500">Octaview Interview Session</div>
-                </div>
-                <div className="p-2">
-                  <img 
-                    src="https://www.bootstrapdash.com/wp-content/uploads/2022/03/screencapture-bootstrapdash-demo-purple-jquery-template-demo-1-2022-03-04-09_46_51-1.png" 
-                    alt="Octaview Interface" 
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+                  <div className="p-2">
+                    <img 
+                      src="https://www.bootstrapdash.com/wp-content/uploads/2022/03/screencapture-bootstrapdash-demo-purple-jquery-template-demo-1-2022-03-04-09_46_51-1.png" 
+                      alt="Octaview Interface" 
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </section>
       
-      {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      {/* Features Section with Hover Effect Cards */}
+      <section className="py-24 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight">
+            <Badge className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-100 px-4 py-1 text-sm rounded-full">Features</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600">
               Everything you need for modern technical interviews
             </h2>
             <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
@@ -162,139 +285,193 @@ const LandingPage = () => {
               create the ultimate technical interview platform.
             </p>
           </div>
+          <HoverEffect items={features.map(feature => ({
+            title: feature.title,
+            description: feature.description,
+            link: feature.link || "#",
+            icon: feature.icon
+          }))} />
+        </div>
+      </section>
+      
+      {/* How It Works Section with Tracing Beam */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-purple-100 text-purple-700 hover:bg-purple-100 px-4 py-1 text-sm rounded-full">Workflow</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">How Octaview Works</h2>
+            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+              A streamlined process from application to hire
+            </p>
+          </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+          <TracingBeam className="px-6">
+            {[
+              {
+                title: "Seamless Integration",
+                description: "Connect Octaview to your company website and ATS system in minutes with our simple API. Import all your existing job listings and candidate data automatically.",
+                icon: <Globe className="h-6 w-6" />,
+              },
+              {
+                title: "Automated Screening",
+                description: "Our AI analyzes resumes and applications based on your specific requirements, automatically identifying the most promising candidates and prioritizing them for interviews.",
+                icon: <Bot className="h-6 w-6" />,
+              },
+              {
+                title: "Interview Scheduling",
+                description: "The system automatically schedules interviews with qualified candidates, handling time zone differences and calendar availability to find the perfect slot for both parties.",
+                icon: <Calendar className="h-6 w-6" />,
+              },
+              {
+                title: "Technical Assessment",
+                description: "Conduct coding interviews with our collaborative editor that supports over 40 programming languages. Observe candidates' problem-solving process in real-time.",
+                icon: <Code2 className="h-6 w-6" />,
+              }
+            ].map((step, index) => (
+              <div key={index} className="mb-16">
+                <div className="flex gap-4 items-start">
+                  <div className="flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 p-3 shadow-lg">
+                    <div className="text-white">
+                      {step.icon}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                    <p className="text-gray-600">{step.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </TracingBeam>
+        </div>
+      </section>
+      
+      {/* Pricing Section (Replacing Social Proof) */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-100 px-4 py-1 text-sm rounded-full">Pricing</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Choose the perfect plan for your team
+            </h2>
+            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+              Transparent pricing with all the features you need to streamline your technical hiring process.
+            </p>
+            
+            <div className="mt-8 flex justify-center">
+              <Tabs 
+                defaultValue="monthly" 
+                value={billingPeriod}
+                onValueChange={setBillingPeriod}
+                className="bg-white rounded-lg p-1 border shadow-sm"
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                  <TabsTrigger value="annual">Annual (10% off)</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {pricingPlans.map((plan, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all"
+                className="relative"
               >
-                <div className={cn("rounded-lg p-3 inline-block", feature.color)}>
-                  <div className={feature.textColor}>
-                    {feature.icon}
-                  </div>
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-gray-600">{feature.description}</p>
+                <Card className={cn(
+                  "relative h-full border-2 transition-all duration-200 hover:shadow-lg",
+                  plan.highlighted ? "border-blue-500 shadow-lg" : "border-gray-200"
+                )}>
+                  {plan.highlighted && (
+                    <div className="absolute -top-4 left-0 right-0 flex justify-center">
+                      <Badge className="bg-blue-500 text-white hover:bg-blue-600 px-3 py-1 rounded-full">
+                        Most Popular
+                      </Badge>
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                    <CardDescription>{plan.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-6">
+                      <div className="flex items-baseline">
+                        <span className="text-4xl font-bold">{plan.price}</span>
+                        <span className="text-gray-500 ml-2">/{plan.period}</span>
+                      </div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-amber-500" />
+                        <span className="text-gray-700 font-medium">{plan.tokens}</span>
+                      </div>
+                    </div>
+                    
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-600">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className={cn(
+                      "w-full py-6 rounded-xl",
+                      plan.highlighted 
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md" 
+                        : "bg-white text-gray-800 border border-gray-300 hover:bg-gray-50"
+                    )}>
+                      Get Started
+                    </Button>
+                  </CardFooter>
+                </Card>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
       
-      {/* How It Works Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight">How Octaview Works</h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-              A streamlined process from application to hire
-            </p>
-          </div>
-          
-          <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gray-200" />
-            
-            {[
-              {
-                title: "Seamless Integration",
-                description: "Connect Octaview to your company website and ATS system",
-                icon: <Globe className="h-6 w-6" />,
-              },
-              {
-                title: "Automated Screening",
-                description: "AI filters applications based on your specific requirements",
-                icon: <Bot className="h-6 w-6" />,
-              },
-              {
-                title: "Interview Scheduling",
-                description: "Automatically schedule interviews with qualified candidates",
-                icon: <Calendar className="h-6 w-6" />,
-              },
-              {
-                title: "Technical Assessment",
-                description: "Conduct coding interviews with our collaborative editor",
-                icon: <Code2 className="h-6 w-6" />,
-              }
-            ].map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.2, duration: 0.5 }}
-                viewport={{ once: true }}
-                className={cn(
-                  "relative mb-12 md:w-5/12",
-                  index % 2 === 0 ? "md:ml-auto md:mr-12" : "md:mr-auto md:ml-12"
-                )}
-              >
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                  <div className="absolute top-6 -left-12 rounded-full bg-white shadow border border-gray-100 p-3 hidden md:block">
-                    {step.icon}
-                  </div>
-                  <div className="md:hidden mb-4 inline-block">
-                    {step.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold">{step.title}</h3>
-                  <p className="mt-2 text-gray-600">{step.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="relative py-24 overflow-hidden">
+      {/* CTA Section - Enhanced */}
+      <section className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-100" />
+        <BackgroundBeams className="opacity-30" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7 }}
             viewport={{ once: true }}
-            className="rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden shadow-xl"
+            className="rounded-2xl bg-gradient-to-br from-blue-600 to-purple-700 overflow-hidden shadow-2xl"
           >
-            <div className="px-6 py-12 md:py-16 md:px-12 text-center text-white">
-              <h2 className="text-3xl md:text-4xl font-bold">
+            <div className="px-6 py-16 md:py-20 md:px-12 text-center text-white relative overflow-hidden">
+              <SparklesCore
+                id="tsparticles-cta"
+                background="transparent"
+                minSize={0.6}
+                maxSize={1.4}
+                particleDensity={70}
+                className="w-full h-full absolute inset-0"
+                particleColor="rgba(255, 255, 255, 0.3)"
+              />
+              <h2 className="text-3xl md:text-5xl font-bold relative z-10">
                 Ready to transform your technical hiring?
               </h2>
-              <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto">
+              <p className="mt-6 text-lg md:text-xl max-w-2xl mx-auto relative z-10">
                 Join leading companies that use Octaview to find the best technical talent faster and more efficiently.
               </p>
-              <div className="mt-10">
-                <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-base rounded-xl">
+              <div className="mt-10 relative z-10">
+                <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-base font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group">
                   Get Started Today
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
             </div>
           </motion.div>
-        </div>
-      </section>
-      
-      {/* Social Proof Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight">Trusted by innovative teams</h2>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center opacity-70">
-            {[1, 2, 3, 4].map((logo) => (
-              <div key={logo} className="h-8">
-                <img 
-                  src="/api/placeholder/160/40" 
-                  alt={`Company logo ${logo}`}
-                  className="h-full w-auto object-contain" 
-                />
-              </div>
-            ))}
-          </div>
         </div>
       </section>
     </div>
