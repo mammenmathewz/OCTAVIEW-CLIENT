@@ -5,7 +5,6 @@ import Navbar from "../../components/user/home-login/NavBar"
 function Doc() {
   return (
     <>
-    <Navbar/>
     <DocumentationPage/>
     </>
   )

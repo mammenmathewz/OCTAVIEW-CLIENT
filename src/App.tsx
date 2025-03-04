@@ -17,6 +17,7 @@ import CandidateDetails from "./pages/user/CandidateDetails";
 import ErrorBoundary from "./utils/ErrorBoundary";  // Import the ErrorBoundary component
 import CreateRoom from "./pages/user/CreateRoom";  // Import CreateRoom component
 import InterviewRoom from "./pages/user/InterviewRoom";  // Import InterviewRoom component
+import PaymentSuccess from "./pages/user/PaymentSuccess";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               <Route path="scheduled-interviews" element={<ScheduledCandidates />} />
               <Route path="jobs" element={<JobPage />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="payment-success" element={<PaymentSuccess />} />  
             </Route>
           </Route>
 

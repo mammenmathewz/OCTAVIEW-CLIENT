@@ -42,7 +42,7 @@ const Settings = () => {
   const [activeSection, setActiveSection] = useState("api");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [purchaseAmount, setPurchaseAmount] = useState("1000");
+  const [purchaseAmount, setPurchaseAmount] = useState("");
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -57,11 +57,17 @@ const Settings = () => {
   });
 
   const tokenPurchaseMutation = useMutation({
-    mutationFn: (amount: number) => purchaseTokens(userId, amount),
-    onSuccess: (_, amount) => {
-      toast({ description: `Successfully purchased ${amount} tokens!` });
-      queryClient.invalidateQueries({ queryKey: ["settings"] });
-      setIsPurchaseDialogOpen(false);
+    mutationFn: async (amount: number) => {
+      if (!userId) throw new Error("User ID is required");
+      return await purchaseTokens(userId, amount);
+    },
+    onSuccess: (checkoutUrl, purchaseAmount) => {
+      // queryClient.invalidateQueries({ queryKey: ["settings"] });
+      setIsPurchaseDialogOpen(false)
+      if (checkoutUrl) {
+        console.log("🔄 Redirecting to checkout:", checkoutUrl);
+        window.location.href = checkoutUrl;
+      }
     },
     onError: () => {
       toast({
@@ -70,7 +76,6 @@ const Settings = () => {
       });
     },
   });
-  
 
   const apiKeyMutation = useMutation({
     mutationFn: () => generateApi(userId),
@@ -225,9 +230,9 @@ const Settings = () => {
                         <SelectValue placeholder="Select amount" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1000">1,000 tokens ($10)</SelectItem>
-                        <SelectItem value="5000">3,000 tokens ($45)</SelectItem>
-                        <SelectItem value="10000">5,000 tokens ($80)</SelectItem>
+                        <SelectItem value="50">1,000 tokens ($50)</SelectItem>
+                        <SelectItem value="125">3,000 tokens ($125)</SelectItem>
+                        <SelectItem value="200">5,000 tokens ($200)</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button onClick={() => setIsPurchaseDialogOpen(true)}>
