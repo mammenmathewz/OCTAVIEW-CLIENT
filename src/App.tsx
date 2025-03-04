@@ -36,9 +36,9 @@ function App() {
               <Route path="candidate-details" element={<CandidateDetails />} />
               <Route path="scheduled-interviews" element={<ScheduledCandidates />} />
               <Route path="jobs" element={<JobPage />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="payment-success" element={<PaymentSuccess />} />  
+              <Route path="settings" element={<Settings />} /> 
             </Route>
+            <Route path="payment-success" element={<PaymentSuccess />} /> 
           </Route>
 
           <Route path="/meet/:roomId" element={<InterviewRoom />} />
