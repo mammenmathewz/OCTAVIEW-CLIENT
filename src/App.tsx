@@ -8,8 +8,6 @@ import CandidateList from "./pages/user/CandidateList";
 import SelectedCandidates from "./pages/user/SelectedCandidates";
 import ScheduledCandidates from "./pages/user/ScheduledCandidates";
 import Settings from "./pages/user/Settings";
-import AdminDash from "./pages/admin/AdminDash";
-import AdminLogin from "./pages/admin/Login";
 import ProtectedRoute from "./utils/ProtectedRoutes";
 import DashboardOverview from "./components/user/Console/DashboardOverview"; 
 import JobPage from "./pages/user/JobList";

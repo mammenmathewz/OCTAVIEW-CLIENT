@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../../components/ui/alert-dialog';
+import FullPageLoader from '../../components/ui/loder';
 
 const CandidateDetails = () => {
   const location = useLocation();
@@ -98,7 +99,9 @@ console.log("Candidate Details",candidate,  "jobid :  : "+jobId);
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Left Section */}
+       {(selectMutation.isPending || rejectMutation.isPending) && (
+        <FullPageLoader text="Processing & Sending Email to candidate..." />
+      )}
       <div className="w-3/12 bg-muted">
         <div className="p-1">
           <Button

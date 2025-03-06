@@ -38,7 +38,7 @@ type Candidate = {
 
 function CandidateList() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>(""); // State for search term
+  const [searchTerm, setSearchTerm] = useState<string>(""); 
   const [debouncedSearch, setDebouncedSearch] = useState<string>(""); // State for debounced search
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the "observer" element
