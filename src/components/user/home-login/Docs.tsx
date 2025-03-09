@@ -15,7 +15,7 @@ const DocumentationPage = () => {
   useEffect(() => {
     document.documentElement.style.scrollPaddingTop = '80px';
     
-    // Add observer for section visibility
+  
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {

@@ -4,7 +4,15 @@ import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import { Checkbox } from "../../ui/checkbox";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../ui/select";
 import { useSelector } from "react-redux";
 import { selectUserId } from "../../../service/redux/store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,18 +33,18 @@ const JobForm: React.FC = () => {
     description: "",
     hidden: false,
   });
-  const userId = useSelector(selectUserId)
-  const {toast} = useToast()
-  const queryClient = useQueryClient()
+  const userId = useSelector(selectUserId);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const {mutate,isPending, isError, error, data} = useMutation({
-    mutationFn: (jobData: any) => submitJob(jobData,userId),
+  const { mutate } = useMutation({
+    mutationFn: (jobData: any) => submitJob(jobData, userId),
     onSuccess: (data: any) => {
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
       toast({
-        variant:'default',
-        description:data.message
-      })
+        variant: "default",
+        description: data.message,
+      });
       setFormData({
         job_title: "",
         skills: "",
@@ -54,7 +62,8 @@ const JobForm: React.FC = () => {
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        description: error.message || "An error occurred while submitting the job.",
+        description:
+          error.message || "An error occurred while submitting the job.",
       });
       console.error("Error submitting job:", error);
     },
@@ -88,7 +97,7 @@ const JobForm: React.FC = () => {
     e.preventDefault();
     const jobData = {
       ...formData,
-      userId, 
+      userId,
     };
     if (formData.min_salary > formData.max_salary) {
       toast({
@@ -114,7 +123,6 @@ const JobForm: React.FC = () => {
   };
 
   return (
-
     <form onSubmit={handleSubmit} className="space-y-4 p-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -159,10 +167,7 @@ const JobForm: React.FC = () => {
         </div>
         <div>
           <Label htmlFor="jobType">Job Type</Label>
-          <Select
-            value={formData.jobType}
-            onValueChange={handleJobTypeChange}
-          >
+          <Select value={formData.jobType} onValueChange={handleJobTypeChange}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select job type" />
             </SelectTrigger>
@@ -256,7 +261,7 @@ const JobForm: React.FC = () => {
           onChange={handleChange}
           placeholder="Enter job description"
           className="mt-2 w-full rounded-md border border-neutral-300 p-2 text-sm"
-          rows={5} 
+          rows={5}
         />
       </div>
 

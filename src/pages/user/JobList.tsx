@@ -3,15 +3,6 @@ import debounce from "lodash.debounce";
 import "../../components/Styles/Scroll.css";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 import JobForm from "../../components/user/Job/JobForm";
 import JobCard from "../../components/user/Job/JobCard";
 import { useSelector } from "react-redux";
@@ -19,19 +10,14 @@ import { selectUserId } from "../../service/redux/store";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchJobs } from "../../service/Api/jobApis";
 import JobDetail from "../../components/user/Job/JobDetail";
-import { Job } from "../../lib/interface"; // Using the shared Job interface
+import { Job } from "../../lib/interface"; 
 
-interface JobsResponse {
-  jobs: Job[];
-  hasMore: boolean;
-  nextPage: number | null;
-}
 
 function JobPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(""); // State for search input
-  const [debouncedSearch, setDebouncedSearch] = useState(""); // Debounced search term
+  const [searchTerm, setSearchTerm] = useState(""); 
+  const [debouncedSearch, setDebouncedSearch] = useState(""); 
 
   const userId = useSelector(selectUserId);
   const observerRef = useRef<HTMLDivElement | null>(null);
@@ -44,12 +30,12 @@ function JobPage() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["jobs", userId, debouncedSearch], // Include search term
+    queryKey: ["jobs", userId, debouncedSearch], 
     queryFn: async ({ pageParam = 1 }) => {
       const response = await fetchJobs({
         pageParam,
         userId: userId ?? "",
-        search: debouncedSearch, // Pass search term to API
+        search: debouncedSearch, 
       });
       return response;
     },

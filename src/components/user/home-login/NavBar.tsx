@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "../../../lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
   X, 
-  ChevronDown,
   ExternalLink,
   LogIn,
-  Bot,
-  Code2,
   Sparkles
 } from "lucide-react";
 import { Button } from "../../ui/button";
@@ -20,7 +17,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
 
-  // Handle scroll effect for navbar
+
   useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;

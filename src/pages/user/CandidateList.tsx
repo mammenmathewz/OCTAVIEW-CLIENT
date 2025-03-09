@@ -44,20 +44,20 @@ function CandidateList() {
   const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the "observer" element
   const navigate = useNavigate();
 
-  // Debounced handler for search input
+ 
   const debouncedHandleSearchChange = useCallback(
     debounce((value: string) => {
-      setDebouncedSearch(value); // Update the debounced search state
-    }, 300), // 300ms delay
+      setDebouncedSearch(value); 
+    }, 300), 
     []
   );
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value); // Update local search term immediately
-    debouncedHandleSearchChange(e.target.value); // Trigger the debounced function
+    setSearchTerm(e.target.value); 
+    debouncedHandleSearchChange(e.target.value); 
   };
 
-  // Fetching jobs with pagination and search query
+
   const {
     data,
     error,
@@ -87,7 +87,7 @@ function CandidateList() {
       }
       return [];
     },
-    enabled: !!selectedJob?.id, // Only run when selectedJob?.id is available
+    enabled: !!selectedJob?.id, 
     refetchOnWindowFocus: false,
   });
 
@@ -98,19 +98,19 @@ function CandidateList() {
       (entries) => {
         const target = entries[0];
         if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage(); // Fetch next page when the observer target is visible
+          fetchNextPage(); 
         }
       },
       {
-        root: null, // Use the viewport as the root
-        rootMargin: "100px", // Preload slightly before reaching the bottom
-        threshold: 1.0, // Trigger only when the element is fully visible
+        root: null,
+        rootMargin: "100px", 
+        threshold: 1.0, 
       }
     );
 
     observer.observe(observerRef.current);
 
-    return () => observer.disconnect(); // Clean up on unmount
+    return () => observer.disconnect(); 
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   const handleCardClick = (job: Job) => {
@@ -126,7 +126,7 @@ function CandidateList() {
             type="search"
             placeholder="Search.."
             value={searchTerm}
-            onChange={handleSearchChange} // Update search state on input change
+            onChange={handleSearchChange} 
           />
         </div>
       </nav>
@@ -139,7 +139,7 @@ function CandidateList() {
           ) : error ? (
             <p>Error loading jobs.</p>
           ) : data?.pages.every((page) => page.jobs.length === 0) ? (
-            <p>No jobs found.</p> // Show this message if no jobs are found
+            <p>No jobs found.</p> 
           ) : (
             data?.pages.map((page) =>
               page.jobs.map((job: Job) => (
@@ -153,7 +153,7 @@ function CandidateList() {
                   location={job.location}
                   city={job.city}
                   hidden={job.hidden}
-                  onClick={() => handleCardClick(job)} // Trigger the fetch for candidates
+                  onClick={() => handleCardClick(job)} 
                 />
               ))
             )
@@ -194,7 +194,7 @@ function CandidateList() {
                         linkedin: candidate.linkedin,
                         resumeUrl: candidate.resumeUrl,
                       },
-                      jobId: selectedJob?.id, // Include the jobId here
+                      jobId: selectedJob?.id, 
                     },
                   })
                 }

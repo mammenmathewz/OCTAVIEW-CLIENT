@@ -53,7 +53,7 @@ const Settings = () => {
   const { data: settingsData, isLoading: isSettingsLoading } = useQuery({
     queryKey: ["settings"],
     queryFn: () => fetchSettingsData(userId),
-    enabled: !!userId, // Only fetch if userId is available
+    enabled: !!userId, 
   });
 
   const tokenPurchaseMutation = useMutation({
@@ -61,7 +61,7 @@ const Settings = () => {
       if (!userId) throw new Error("User ID is required");
       return await purchaseTokens(userId, amount);
     },
-    onSuccess: (checkoutUrl, purchaseAmount) => {
+    onSuccess: (checkoutUrl) => {
       // queryClient.invalidateQueries({ queryKey: ["settings"] });
       setIsPurchaseDialogOpen(false)
       if (checkoutUrl) {
@@ -79,7 +79,7 @@ const Settings = () => {
 
   const apiKeyMutation = useMutation({
     mutationFn: () => generateApi(userId),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({ description: "API Key regenerated successfully!" });
       queryClient.invalidateQueries({ queryKey: ["settings"] });
     },
@@ -277,7 +277,7 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile Menu Toggle */}
+
       <Button
         variant="ghost"
         size="icon"

@@ -1,18 +1,14 @@
 
-import React, { useState } from "react";
+import  { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "../../ui/sideBar";
 import {
   IconAdjustments,
-  IconArrowLeft,
-  IconBrandTabler,
   IconBriefcase,
   IconCalendarEvent,
-  IconSettings,
-  IconUserBolt,
   IconUserCheck,
   IconUsers,
 } from "@tabler/icons-react";
-import { Link, Outlet } from "react-router-dom"; // Import Outlet here
+import { Link, Outlet } from "react-router-dom"; 
 import { motion } from "framer-motion";
 import { cn } from "../../../lib/utils";
 import ErrorBoundary from "../../../utils/ErrorBoundary";

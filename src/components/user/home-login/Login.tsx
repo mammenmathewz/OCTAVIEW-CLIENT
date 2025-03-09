@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Label } from "../../ui/Login_ui/label";
 import { Input } from "../../ui/Login_ui/input";
 import { cn } from "../../../lib/utils";
-import { IconBrandGoogle } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../../../service/Api/userApis";
@@ -35,7 +34,7 @@ export function LoginForm() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { mutate, isPending, isError, error, data } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: (credentials: LoginRequest) => loginUser(credentials),
     onSuccess: (data: LoginResponse) => {
       const { token, user } = data;
@@ -49,7 +48,7 @@ export function LoginForm() {
       );
     
       console.log("Login successful:", data);
-      navigate("/dash"); // Navigate to the dashboard
+      navigate("/dash"); 
     },
     
     onError: (error: Error) => {
@@ -62,7 +61,7 @@ export function LoginForm() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isPending) return; // Prevent multiple submissions
+    if (isPending) return; 
     mutate({ email, password });
   };
 

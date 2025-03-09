@@ -1,8 +1,7 @@
-import React from 'react';
-import { Briefcase, MapPin, DollarSign } from 'lucide-react'; // Importing Lucide Icons
-import { Card, CardHeader, CardTitle, CardContent } from '../../ui/card'; // Importing ShadCN UI components
+import React from "react";
+import { Briefcase, MapPin, DollarSign } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
 
-// Define the JobCard component
 interface JobCardProps {
   job_title: string;
   job_role: string;
@@ -29,29 +28,35 @@ const JobCard: React.FC<JobCardProps> = ({
   return (
     <Card
       className="shadow-md rounded-lg p-4 mb-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-      onClick={onClick} // Attaching onClick to the Card component
+      onClick={onClick}
     >
       <CardHeader>
         <CardTitle className="font-semibold text-xl ">{job_title}</CardTitle>
       </CardHeader>
-      
+
       <CardContent>
         {/* Job Role & Level */}
         <div className="flex items-center space-x-2 mb-3">
           <Briefcase size={20} />
-          <p className="text-sm">{job_role} | {job_level}</p>
+          <p className="text-sm">
+            {job_role} | {job_level}
+          </p>
         </div>
 
         {/* Salary Range */}
         <div className="flex items-center space-x-2 mb-3">
           <DollarSign size={20} />
-          <p className="text-sm">${min_salary} - ${max_salary}</p>
+          <p className="text-sm">
+            ${min_salary} - ${max_salary}
+          </p>
         </div>
 
         {/* Location */}
         <div className="flex items-center space-x-2 mb-3">
           <MapPin size={20} />
-          <p className="text-sm">{location}, {city}</p>
+          <p className="text-sm">
+            {location}, {city}
+          </p>
         </div>
 
         {/* Hidden Status */}

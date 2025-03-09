@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { useParams, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { IconMusic, IconMusicOff, IconVideo, IconVideoOff, IconPhoneOff } from "@tabler/icons-react";
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://server.octaview.tech", {
   transports: ["websocket"],
   reconnection: true
 });
+
 
 const Meet = ({ roomId }: { roomId: string }) => {
   const navigate = useNavigate();

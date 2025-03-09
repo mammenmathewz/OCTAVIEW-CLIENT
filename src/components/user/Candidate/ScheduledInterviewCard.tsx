@@ -20,7 +20,6 @@ const InterviewCard = ({ interviewData }:any) => {
     const navigate = useNavigate();
   
     const handleMeetingJoin = () => {
-      // Instead of opening in a new tab, navigate with the interview data
       navigate("/create-room", { 
         state: { interviewData: { candidate, job, date, time } } 
       });

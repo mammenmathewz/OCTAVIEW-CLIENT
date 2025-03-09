@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { Button } from "../../ui/button"; // Assuming Button is from ShadCN UI
-import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover"; // ShadCN Popover
+import { Button } from "../../ui/button"; 
+import { Popover, PopoverTrigger, PopoverContent } from "../../ui/popover"; 
 import { Calendar } from "../../ui/calendar";
 import { format } from "date-fns";
 import { useMutation } from "@tanstack/react-query";
-import { updateInterviewDateTime, rejectCandidate } from "../../../service/Api/candidateApi"; // Path to the API function
-import { useToast } from "../../../@/hooks/use-toast"; // Assuming you have a toast hook
+import { updateInterviewDateTime, rejectCandidate } from "../../../service/Api/candidateApi"; 
+import { useToast } from "../../../@/hooks/use-toast"; 
 
-// Importing AlertDialog components
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,7 @@ import {
 } from '../../ui/alert-dialog';
 
 interface SelectedCandidateCardProps {
-  selectedCandidateId: string; // Added selectedCandidateId prop
+  selectedCandidateId: string; 
   candidate: {
     _id: string;
     fullName: string;
@@ -42,11 +42,11 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("10:00");
-  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false); // State to manage reject dialog visibility
-  const { toast } = useToast(); // Initialize toast
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false); 
+  const { toast } = useToast(); 
 
   // Interview scheduling mutation
-  const { mutate: scheduleInterview, isError, error } = useMutation({
+  const { mutate: scheduleInterview } = useMutation({
     mutationFn: ({
       selectedCandidateId,
       interviewDate,
@@ -57,8 +57,8 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
       interviewTime: string;
     }) =>
       updateInterviewDateTime(
-        selectedCandidateId,  // Pass this as the first argument
-        interviewDate,  // String formatted date
+        selectedCandidateId,  
+        interviewDate,  
         interviewTime
       ),
     onSuccess: () => {
@@ -77,14 +77,14 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
   });
 
   // Candidate rejection mutation
-  const { mutate: rejectInterview, isError: isRejectError, error: rejectError } = useMutation({
+  const { mutate: rejectInterview} = useMutation({
     mutationFn: (candidateId: string) => rejectCandidate({ candidateId }),
     onSuccess: () => {
       toast({
         variant: "default",
         description: "Candidate rejected successfully.",
       });
-      setIsRejectDialogOpen(false); // Close the reject dialog after success
+      setIsRejectDialogOpen(false); 
     },
     onError: (err: any) => {
       toast({
@@ -102,17 +102,14 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
     }
   };
 
-  // Handle scheduling of interview
+
   const handleSchedule = () => {
     if (selectedDate && selectedTime) {
-      // Format date as a string
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
-
-      // Pass formatted date and selected time (both are strings)
       scheduleInterview({
         selectedCandidateId,
-        interviewDate: formattedDate,  // Pass formatted date as string
-        interviewTime: selectedTime,   // Time is already a string
+        interviewDate: formattedDate,  
+        interviewTime: selectedTime,   
       });
 
       console.log(`Scheduling interview for Candidate ID: ${selectedCandidateId}`);
@@ -124,7 +121,7 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
     }
   };
 
-  // Handle opening the reject dialog
+ 
   const handleReject = () => {
     setIsRejectDialogOpen(true);
   };
@@ -162,11 +159,10 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
         </Button>
       </div>
 
-      {/* Date and Time Picker Section */}
+
       <div className="mb-4">
         <label className="block text-gray-700 font-medium mb-2">Schedule Interview</label>
 
-        {/* Date Picker */}
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start">
@@ -182,7 +178,7 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
           </PopoverContent>
         </Popover>
 
-        {/* Time Picker */}
+      
         <div className="mt-4">
           <label htmlFor="time" className="block text-gray-700 mb-2">Select Interview Time</label>
           <input
@@ -195,7 +191,7 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
         </div>
       </div>
 
-      {/* Schedule Button */}
+     
       <Button 
         variant="default" 
         className="w-full" 
@@ -204,10 +200,8 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
         Schedule Interview
       </Button>
 
-      {/* Reject Candidate Confirmation Dialog */}
       <AlertDialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
         <AlertDialogTrigger asChild>
-          {/* Empty button or element to trigger */}
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -220,8 +214,8 @@ const SelectedCandidateCard: React.FC<SelectedCandidateCardProps> = ({
             <AlertDialogCancel onClick={() => setIsRejectDialogOpen(false)}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                rejectInterview(candidate._id); // Trigger rejection
-                setIsRejectDialogOpen(false); // Close the dialog after rejection
+                rejectInterview(candidate._id);
+                setIsRejectDialogOpen(false); 
               }}
             >
               Reject

@@ -1,7 +1,7 @@
 import { UserId } from "src/lib/types";
 import axiosInstance from "../axios/axios"; 
 import axios from "axios";
-import { log } from "console";
+
 
 export const fetchSelectedCandidatesByJob = async ({ jobId }: { jobId: string }) => {
   console.log('Fetching selectedcandidates for jobId:', jobId);

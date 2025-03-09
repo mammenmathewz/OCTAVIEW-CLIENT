@@ -20,23 +20,12 @@ type Job = {
   hidden: boolean;
 };
 
-type Candidate = {
-  _id: string;
-  fullName: string;
-  email: string;
-  contactNo: string;
-  linkedin: string;
-  github: string;
-  resumeUrl: string;
-  selectionStatus: string;
-  DOB: string;
-  country: string;
-};
+
 
 function SelectedCandidates() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>(""); // State for search term
-  const [debouncedSearch, setDebouncedSearch] = useState<string>(""); // Debounced search term
+  const [searchTerm, setSearchTerm] = useState<string>(""); 
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(""); 
   const userId = useSelector(selectUserId);
   const jobsListRef = useRef<HTMLDivElement | null>(null);
 
@@ -88,7 +77,7 @@ function SelectedCandidates() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-    }, 500); // Delay API call by 500ms
+    }, 500); 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 

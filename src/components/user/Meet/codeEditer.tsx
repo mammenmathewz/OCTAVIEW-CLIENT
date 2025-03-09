@@ -9,13 +9,13 @@ import { FitAddon } from "xterm-addon-fit";
 import { Play, Users, Cpu, X } from "lucide-react";
 import "xterm/css/xterm.css";
 
-// Updated languages array with Judge0 IDs
+
 const languages = [
-  { id: "javascript", name: "JavaScript", ext: ".js", judge0Id: 63 },  // Node.js
-  { id: "python", name: "Python", ext: ".py", judge0Id: 71 },         // Python 3
-  { id: "cpp", name: "C++", ext: ".cpp", judge0Id: 54 },             // C++ (GCC 9.2.0)
-  { id: "java", name: "Java", ext: ".java", judge0Id: 62 },          // Java (OpenJDK 13.0.1)
-  { id: "typescript", name: "TypeScript", ext: ".ts", judge0Id: 74 }  // TypeScript
+  { id: "javascript", name: "JavaScript", ext: ".js", judge0Id: 63 },  
+  { id: "python", name: "Python", ext: ".py", judge0Id: 71 },         
+  { id: "cpp", name: "C++", ext: ".cpp", judge0Id: 54 },             
+  { id: "java", name: "Java", ext: ".java", judge0Id: 62 },         
+  { id: "typescript", name: "TypeScript", ext: ".ts", judge0Id: 74 }  
 ];
 
 interface CodeEditorProps {
@@ -44,7 +44,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     if (docRef.current) docRef.current.destroy();
   };
 
-  // Initialize Y.js document and WebRTC provider
   useEffect(() => {
     if (!roomId) return;
     cleanup();
@@ -52,12 +51,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     const yDoc = new Y.Doc();
     docRef.current = yDoc;
     const webrtcProvider = new WebrtcProvider(`code-${roomId}`, yDoc, {
-      signaling: ["ws://localhost:4444"],
-      maxConns: 20,
+      signaling: ["wss://yjs.octaview.tech/"],  
       peerOpts: {
         config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] }
       }
     });
+    
     providerRef.current = webrtcProvider;
 
     yLanguage.current = yDoc.getText("language");
@@ -284,7 +283,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     try {
       const languageId = currentLang?.judge0Id || 63; // Default to Node.js if not found
   
-      const response = await fetch("http://localhost:5000/api/meet/compile", {
+      const response = await fetch("https://server.octaview.tech/api/meet/compile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -299,7 +298,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
       if (data.error) {
         messages.push(`Error: ${data.error}`);
       } else {
-        // Build the output string
         const outputs = [];
         if (data.stdout) outputs.push(data.stdout);
         if (data.stderr) outputs.push(`Errors:\n${data.stderr}`);

@@ -52,7 +52,6 @@ function Login() {
         )}
       </div>
 
-      {/* Right Side: Ad Section (only visible on large screens) */}
       <div className="hidden lg:flex lg:w-1/2 h-full items-center justify-center bg-gray-100 p-4 rounded-lg">
         {/* Add ad content here */}
         <div className="text-center max-w-md">

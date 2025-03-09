@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
-import { Clock, Users, Briefcase, FileText, Calendar, ArrowUpRight, ArrowDownRight, Activity, MapPin, Video, User, Phone } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, Legend } from 'recharts';
+import { Clock, Users, Briefcase, FileText, Calendar, ArrowUpRight, MapPin, Video, User,  } from 'lucide-react';
 
 const RecruitmentDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   
-  // Update time every minute
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -34,15 +33,7 @@ const RecruitmentDashboard = () => {
     { name: 'DevOps', count: 5, fill: '#808080' },
   ];
 
-  const sourcesData = [
-    { name: 'LinkedIn', value: 45 },
-    { name: 'Indeed', value: 25 },
-    { name: 'Referrals', value: 15 },
-    { name: 'Company Site', value: 10 },
-    { name: 'Other', value: 5 },
-  ];
-  
-  const COLORS = ['#000000', '#1a1a1a', '#333333', '#4d4d4d', '#666666'];
+ 
 
   const upcomingInterviews = [
     { 

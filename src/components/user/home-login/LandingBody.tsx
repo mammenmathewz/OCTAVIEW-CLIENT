@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../../lib/utils";
 import { Button } from "../../ui/button";
@@ -26,13 +26,13 @@ import {
   CardHeader,
   CardTitle
 } from "../../ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Badge } from "../../ui/badge";
 import { TracingBeam } from "../../ui/tracing-beam";
 import { useInView } from "react-intersection-observer";
 import web_octaview from '../../../assets/web_octaview.png'
+
+
 const LandingPage = () => {
-  const [billingPeriod, setBillingPeriod] = useState("monthly");
   
   const features = [
     {

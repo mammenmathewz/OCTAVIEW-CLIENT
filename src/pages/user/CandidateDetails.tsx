@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { selectCandidate, rejectCandidate } from '../../service/Api/candidateApi';
@@ -37,7 +37,7 @@ const CandidateDetails = () => {
   const { candidate,jobId } = location.state || {};
   const queryClient = useQueryClient();
   const { toast } = useToast();
-console.log("Candidate Details",candidate,  "jobid :  : "+jobId);
+
 
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isSelectDialogOpen, setSelectDialogOpen] = useState(false);
