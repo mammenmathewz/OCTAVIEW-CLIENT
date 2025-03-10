@@ -1,4 +1,4 @@
-
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../../lib/utils";
 import { Button } from "../../ui/button";
@@ -30,6 +30,8 @@ import { Badge } from "../../ui/badge";
 import { TracingBeam } from "../../ui/tracing-beam";
 import { useInView } from "react-intersection-observer";
 import web_octaview from '../../../assets/web_octaview.png'
+import VideoPlayerModal from '../home-login/Video-Plaayer'
+import videoFile from '../../../assets/test.mp4'
 
 
 const LandingPage = () => {
@@ -127,6 +129,7 @@ const LandingPage = () => {
     triggerOnce: false,
     threshold: 0.1,
   });
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   return (
     <div className="relative w-full overflow-hidden bg-white">
@@ -182,7 +185,7 @@ const LandingPage = () => {
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button variant="outline" className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-6 text-base font-medium rounded-xl group">
+              <Button  onClick={() => setIsVideoModalOpen(true)} variant="outline" className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-6 text-base font-medium rounded-xl group">
                 Watch Demo
                 <Video className="ml-2 h-5 w-5 group-hover:scale-110 transition-transform" />
               </Button>
@@ -453,8 +456,14 @@ const LandingPage = () => {
           </motion.div>
         </div>
       </section>
+      <VideoPlayerModal 
+    videoSrc={videoFile} // Update with your actual video source
+    isOpen={isVideoModalOpen}
+    onClose={() => setIsVideoModalOpen(false)}
+  />
     </div>
   );
 };
 
 export default LandingPage;
+
