@@ -275,7 +275,7 @@ const LandingPage = () => {
               Everything you need for modern technical interviews
             </h2>
             <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-              Octaview combines AI intelligence with powerful collaboration tools to 
+              Octaview is a powerful collaboration tools to 
               create the ultimate technical interview platform.
             </p>
           </div>
