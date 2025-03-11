@@ -50,10 +50,27 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
 
     const yDoc = new Y.Doc();
     docRef.current = yDoc;
+    
     const webrtcProvider = new WebrtcProvider(`code-${roomId}`, yDoc, {
       signaling: ["https://yjs.octaview.tech/"],  
       peerOpts: {
-        config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] }
+        config: {
+          iceServers: [
+            { urls: ["stun:ss-turn1.xirsys.com"] },
+            { 
+              urls: [
+                "turn:ss-turn1.xirsys.com:80?transport=udp",
+                "turn:ss-turn1.xirsys.com:3478?transport=udp",
+                "turn:ss-turn1.xirsys.com:80?transport=tcp",
+                "turn:ss-turn1.xirsys.com:3478?transport=tcp",
+                "turns:ss-turn1.xirsys.com:443?transport=tcp",
+                "turns:ss-turn1.xirsys.com:5349?transport=tcp"
+              ],
+              username: "BUlATLtKwWzdRro0Wkr0yAVKI9jtAnONM3c7RME-RY55elCsAfa-dO_CYgFLiNLcAAAAAGfQcqNNYW1tZW5NQXRoZXc=",
+              credential: "2ff98a68-fe9e-11ef-866a-0242ac140004"
+            }
+          ]
+        }
       }
     });
     
