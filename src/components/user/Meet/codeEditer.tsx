@@ -51,7 +51,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ roomId }) => {
     const yDoc = new Y.Doc();
     docRef.current = yDoc;
     const webrtcProvider = new WebrtcProvider(`code-${roomId}`, yDoc, {
-      signaling: ["wss://yjs.octaview.tech/"],  
+      signaling: ["https://yjs.octaview.tech/"],  
       peerOpts: {
         config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] }
       }
