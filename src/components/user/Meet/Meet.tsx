@@ -31,6 +31,7 @@ const Meet = ({ roomId }: { roomId: string }) => {
       if (peerConnection.current) {
         peerConnection.current.close();
       }
+      //udated ice servers to xirsys
 
       const config: RTCConfiguration = {
         iceServers: [
