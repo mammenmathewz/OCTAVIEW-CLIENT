@@ -37,11 +37,39 @@ export async function getTurnCredentials() {
     );
     const data = await response.json();
     console.log("TURN Credentials:", data);
-    return data;
+    
+    // Check if we got valid credentials
+    if (Array.isArray(data) && data.length > 0) {
+      return data;
+    } else {
+      console.warn("Invalid TURN credentials received, using fallback servers");
+      return getFallbackIceServers();
+    }
   } catch (error) {
     console.error("Error fetching TURN credentials:", error);
-    return [];
+    return getFallbackIceServers();
   }
 }
+
+export function getFallbackIceServers() {
+  return [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun2.l.google.com:19302" },
+    { urls: "stun:stun3.l.google.com:19302" },
+    { urls: "stun:stun4.l.google.com:19302" },
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject"
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject"
+    }
+  ];
+}
+
 
 //req for compile (meet/compile)    is on 286 line codeEditer.tsx    
