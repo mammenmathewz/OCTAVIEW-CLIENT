@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IconMusic, IconMusicOff, IconVideo, IconVideoOff, IconPhoneOff } from "@tabler/icons-react";
 
 const socket = io("https://server.octaview.tech", {
@@ -177,17 +177,26 @@ const Meet = ({ roomId }: { roomId: string }) => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <h1 className="absolute top-4 left-4 text-lg font-semibold">Room: {roomId}</h1>
-      {error && <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded">{error}</div>}
+    <div className="relative flex items-center justify-center min-h-screen bg-gray-900 text-white overflow-hidden">
+      <h1 className="absolute top-4 left-4 z-10 text-lg font-semibold">Room: {roomId}</h1>
+      {error && <div className="absolute top-4 right-4 z-10 bg-red-500 text-white px-4 py-2 rounded">{error}</div>}
 
-      <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover rounded-lg border-2 border-gray-700" />
+      {/* Added max-h-[calc(100vh-100px)] to limit the height and leave space for controls */}
+      <div className="relative w-full h-full max-h-[calc(100vh-100px)]">
+        <video 
+          ref={remoteVideoRef} 
+          autoPlay 
+          playsInline 
+          className="w-full h-full max-h-[calc(100vh-100px)] object-cover rounded-lg border-2 border-gray-700" 
+        />
+      </div>
 
-      <div className="absolute bottom-20 right-6 w-28 h-20 bg-black rounded-lg border-2 border-gray-600 overflow-hidden">
+      <div className="absolute bottom-20 right-6 z-10 w-28 h-20 bg-black rounded-lg border-2 border-gray-600 overflow-hidden">
         <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
       </div>
 
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4 bg-gray-800 bg-opacity-80 px-6 py-3 rounded-full">
+      {/* Fixed position for the controls, bottom-10 ensures they're visible */}
+      <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 flex gap-4 bg-gray-800 bg-opacity-80 px-6 py-3 rounded-full z-20">
         <button onClick={toggleMic} className="p-3 bg-gray-700 hover:bg-gray-600 rounded-full">
           {micEnabled ? <IconMusic size={24} /> : <IconMusicOff size={24} />}
         </button>
@@ -199,7 +208,7 @@ const Meet = ({ roomId }: { roomId: string }) => {
         </button>
       </div>
 
-      <div className="absolute bottom-2 text-sm text-gray-300">
+      <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 text-sm text-gray-300 z-10">
         Status: {isConnected ? "Connected" : "Connecting..."}
       </div>
     </div>

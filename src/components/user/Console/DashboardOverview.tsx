@@ -132,7 +132,7 @@ const RecruitmentDashboard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center">
               <Users className="h-4 w-4 mr-2" />
-              Total Candidates Visited
+              Application under prosess
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -238,12 +238,11 @@ const RecruitmentDashboard = () => {
           <CardHeader className="pb-4">
             <CardTitle className="text-sm font-medium flex items-center">
               <Calendar className="h-4 w-4 mr-2" />
-              Interviews Tomorrow
+              Next Interview
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <div className="flex justify-between items-center">
-              <div className="text-4xl font-bold">4</div>
               <div className="bg-black text-white p-2 rounded-md flex items-center text-sm font-medium">
           <Clock className="h-4 w-4 mr-1" />
           <span>{hours}h {minutes}m until first interview</span>
@@ -331,8 +330,8 @@ const RecruitmentDashboard = () => {
         <Card className="lg:col-span-3 shadow-md hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Tomorrow's Interviews</CardTitle>
-              <CardDescription>Scheduled for {new Date(currentTime.getTime() + 86400000).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</CardDescription>
+              <CardTitle>Interviews</CardTitle>
+              <CardDescription>Scheduled for this month </CardDescription>
             </div>
             <div className="bg-black text-white p-2 rounded-md flex items-center">
               <Clock className="h-4 w-4 mr-1" />
