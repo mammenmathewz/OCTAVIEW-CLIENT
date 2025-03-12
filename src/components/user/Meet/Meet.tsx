@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IconMusic, IconMusicOff, IconVideo, IconVideoOff, IconPhoneOff } from "@tabler/icons-react";
 
 const socket = io("https://server.octaview.tech", {
@@ -19,6 +19,7 @@ const Meet = ({ roomId }: { roomId: string }) => {
   const [error, setError] = useState<string>("");
   const [micEnabled, setMicEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const pendingCandidates = useRef<RTCIceCandidate[]>([]);
 
   useEffect(() => {
@@ -152,6 +153,21 @@ const Meet = ({ roomId }: { roomId: string }) => {
         console.error("Error handling ICE candidate:", err);
       }
     });
+    
+    // Handle fullscreen status updates from peer
+    socket.on("fullscreen-status", ({ isFullScreen: peerFullScreen }) => {
+      // Display notification that peer changed fullscreen status
+      const status = peerFullScreen ? "entered" : "exited";
+      const notification = document.createElement("div");
+      notification.className = "fixed top-16 left-1/2 transform -translate-x-1/2 bg-gray-800 bg-opacity-80 text-white px-4 py-2 rounded z-30";
+      notification.textContent = `Peer ${status} fullscreen mode`;
+      document.body.appendChild(notification);
+      
+      // Remove notification after 3 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    });
 
     startCall();
 
@@ -163,6 +179,7 @@ const Meet = ({ roomId }: { roomId: string }) => {
       socket.off("offer");
       socket.off("answer");
       socket.off("ice-candidate");
+      socket.off("fullscreen-status");
     };
   }, [roomId, navigate]);
 
@@ -175,31 +192,124 @@ const Meet = ({ roomId }: { roomId: string }) => {
     localStream.current?.getVideoTracks().forEach(track => track.enabled = !track.enabled);
     setVideoEnabled(prev => !prev);
   };
+  
+  const toggleFullScreen = () => {
+    const newFullScreenState = !isFullScreen;
+    setIsFullScreen(newFullScreenState);
+    
+    // Emit fullscreen status change to peer
+    socket.emit("fullscreen-status", { roomId, isFullScreen: newFullScreenState });
+    
+    // Handle actual fullscreen toggling
+    if (newFullScreenState) {
+      const videoContainer = document.querySelector(".video-container");
+      if (videoContainer) {
+        if (videoContainer.requestFullscreen) {
+          videoContainer.requestFullscreen();
+        } else if ((videoContainer as any).webkitRequestFullscreen) {
+          (videoContainer as any).webkitRequestFullscreen();
+        } else if ((videoContainer as any).msRequestFullscreen) {
+          (videoContainer as any).msRequestFullscreen();
+        }
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        (document as any).msExitFullscreen();
+      }
+    }
+  };
+  
+  // Listen for system fullscreen changes
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      const fullScreenElement = 
+        document.fullscreenElement || 
+        (document as any).webkitFullscreenElement || 
+        (document as any).msFullscreenElement;
+      
+      const newFullScreenState = !!fullScreenElement;
+      
+      // Only emit if state actually changed to prevent loops
+      if (newFullScreenState !== isFullScreen) {
+        setIsFullScreen(newFullScreenState);
+        socket.emit("fullscreen-status", { roomId, isFullScreen: newFullScreenState });
+      }
+    };
+    
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullScreenChange);
+    document.addEventListener("msfullscreenchange", handleFullScreenChange);
+    
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullScreenChange);
+      document.removeEventListener("msfullscreenchange", handleFullScreenChange);
+    };
+  }, [roomId, isFullScreen]);
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <h1 className="absolute top-4 left-4 text-lg font-semibold">Room: {roomId}</h1>
-      {error && <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded">{error}</div>}
+    <div className="relative flex items-center justify-center min-h-screen bg-gray-900 text-white overflow-hidden">
+      <h1 className="absolute top-4 left-4 z-10 text-lg font-semibold">Room: {roomId}</h1>
+      {error && <div className="absolute top-4 right-4 z-10 bg-red-500 text-white px-4 py-2 rounded">{error}</div>}
 
-      <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover rounded-lg border-2 border-gray-700" />
+      {/* Added max-h-[calc(100vh-100px)] to limit the height and leave space for controls */}
+      <div className="relative w-full h-full max-h-[calc(100vh-100px)] video-container">
+        <video 
+          ref={remoteVideoRef} 
+          autoPlay 
+          playsInline 
+          className="w-full h-full max-h-[calc(100vh-100px)] object-cover rounded-lg border-2 border-gray-700" 
+        />
+        {isFullScreen && (
+          <div className="absolute top-4 right-4 bg-gray-800 bg-opacity-70 text-white px-3 py-1 rounded z-20">
+            Fullscreen Mode
+          </div>
+        )}
+      </div>
 
-      <div className="absolute bottom-20 right-6 w-28 h-20 bg-black rounded-lg border-2 border-gray-600 overflow-hidden">
+      <div className="absolute bottom-20 right-6 z-10 w-28 h-20 bg-black rounded-lg border-2 border-gray-600 overflow-hidden">
         <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
       </div>
 
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-4 bg-gray-800 bg-opacity-80 px-6 py-3 rounded-full">
+      {/* Fixed position for the controls, bottom-10 ensures they're visible */}
+      <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 flex gap-4 bg-gray-800 bg-opacity-80 px-6 py-3 rounded-full z-20">
         <button onClick={toggleMic} className="p-3 bg-gray-700 hover:bg-gray-600 rounded-full">
           {micEnabled ? <IconMusic size={24} /> : <IconMusicOff size={24} />}
         </button>
         <button onClick={toggleVideo} className="p-3 bg-gray-700 hover:bg-gray-600 rounded-full">
           {videoEnabled ? <IconVideo size={24} /> : <IconVideoOff size={24} />}
         </button>
+        <button onClick={toggleFullScreen} className="p-3 bg-gray-700 hover:bg-gray-600 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {!isFullScreen ? (
+              // Expand icon
+              <>
+                <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+                <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+                <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+                <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+              </>
+            ) : (
+              // Minimize icon
+              <>
+                <path d="M8 3v3a2 2 0 0 1-2 2H3"></path>
+                <path d="M21 8h-3a2 2 0 0 1-2-2V3"></path>
+                <path d="M3 16h3a2 2 0 0 1 2 2v3"></path>
+                <path d="M16 21v-3a2 2 0 0 1 2-2h3"></path>
+              </>
+            )}
+          </svg>
+        </button>
         <button onClick={() => navigate("/")} className="p-3 bg-red-600 hover:bg-red-500 rounded-full">
           <IconPhoneOff size={24} />
         </button>
       </div>
 
-      <div className="absolute bottom-2 text-sm text-gray-300">
+      <div className="fixed bottom-2 left-1/2 transform -translate-x-1/2 text-sm text-gray-300 z-10">
         Status: {isConnected ? "Connected" : "Connecting..."}
       </div>
     </div>
