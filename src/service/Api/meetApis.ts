@@ -30,5 +30,18 @@ export const sendEmailToCandidate = async (payload: EmailPayload): Promise<void>
   }
 };
 
+export async function getTurnCredentials() {
+  try {
+    const response = await fetch(
+      "https://octaview.metered.live/api/v1/turn/credentials?apiKey=bc49f068b9ad137d590f1cc97de5e5a85048"
+    );
+    const data = await response.json();
+    console.log("TURN Credentials:", data);
+    return data;
+  } catch (error) {
+    console.error("Error fetching TURN credentials:", error);
+    return [];
+  }
+}
 
 //req for compile (meet/compile)    is on 286 line codeEditer.tsx    

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { IconMusic, IconMusicOff, IconVideo, IconVideoOff, IconPhoneOff } from "@tabler/icons-react";
+import { getTurnCredentials } from "./../../../service/Api/meetApis";
+
 
 const socket = io("https://server.octaview.tech", {
   transports: ["websocket"],
@@ -27,50 +29,45 @@ const Meet = ({ roomId }: { roomId: string }) => {
       return;
     }
 
-    const initializePeerConnection = () => {
+    const initializePeerConnection = async () => {
       if (peerConnection.current) {
         peerConnection.current.close();
       }
-      //udated ice servers to xirsys
-
-      const config: RTCConfiguration = {
-        iceServers: [
-          {
-            urls: [
-              "turn:ss-turn1.xirsys.com:80?transport=udp",
-              "turn:ss-turn1.xirsys.com:3478?transport=udp",
-              "turn:ss-turn1.xirsys.com:80?transport=tcp",
-              "turn:ss-turn1.xirsys.com:3478?transport=tcp",
-              "turns:ss-turn1.xirsys.com:443?transport=tcp",
-              "turns:ss-turn1.xirsys.com:5349?transport=tcp",
-            ],
-            username:
-              "BUlATLtKwWzdRro0Wkr0yAVKI9jtAnONM3c7RME-RY55elCsAfa-dO_CYgFLiNLcAAAAAGfQcqNNYW1tZW5NQXRoZXc=",
-            credential: "2ff98a68-fe9e-11ef-866a-0242ac140004",
-          },
-        ],
-      };
-      
-      peerConnection.current = new RTCPeerConnection(config);
-
-      peerConnection.current.onicecandidate = (event) => {
-        if (event.candidate) {
-          console.log("Sending ICE candidate:", event.candidate);
-          socket.emit("ice-candidate", { roomId, candidate: event.candidate });
-        }
-      };
-      peerConnection.current.ontrack = (event) => {
-        if (remoteVideoRef.current) {
-          remoteVideoRef.current.srcObject = event.streams[0];
-        }
-      };
-
-      // Add connection state change handler
-      peerConnection.current.onconnectionstatechange = () => {
-        console.log("Connection state:", peerConnection.current?.connectionState);
-        setIsConnected(peerConnection.current?.connectionState === 'connected');
-      };
+    
+      try {
+        // Fetch TURN credentials dynamically
+        const iceServers = await getTurnCredentials();
+    
+        const config: RTCConfiguration = {
+          iceServers, // Use fetched TURN servers
+          iceTransportPolicy: "relay", // Prioritize TURN for better connectivity
+        };
+    
+        peerConnection.current = new RTCPeerConnection(config);
+    
+        peerConnection.current.onicecandidate = (event) => {
+          if (event.candidate) {
+            console.log("Sending ICE candidate:", event.candidate);
+            socket.emit("ice-candidate", { roomId, candidate: event.candidate });
+          }
+        };
+    
+        peerConnection.current.ontrack = (event) => {
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = event.streams[0];
+          }
+        };
+    
+        // Handle connection state changes
+        peerConnection.current.onconnectionstatechange = () => {
+          console.log("Connection state:", peerConnection.current?.connectionState);
+          setIsConnected(peerConnection.current?.connectionState === "connected");
+        };
+      } catch (error) {
+        console.error("Failed to fetch TURN credentials:", error);
+      }
     };
+    
 
     const startCall = async () => {
       try {
