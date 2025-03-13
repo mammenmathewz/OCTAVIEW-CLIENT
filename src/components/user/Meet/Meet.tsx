@@ -24,7 +24,6 @@ const Meet = ({ roomId }: { roomId: string }) => {
   const [error, setError] = useState<string>("");
   const [micEnabled, setMicEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
-  const pendingCandidates = useRef<RTCIceCandidate[]>([]);
   const [connectionState, setConnectionState] = useState<string>("new");
 
   useEffect(() => {
