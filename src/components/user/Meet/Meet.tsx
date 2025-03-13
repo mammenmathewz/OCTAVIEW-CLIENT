@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { IconMusic, IconMusicOff, IconVideo, IconVideoOff, IconPhoneOff } from "@tabler/icons-react";
-import { getTurnCredentials } from "./../../../service/Api/meetApis";
+
 
 const socket = io("https://server.octaview.tech", {
   transports: ["websocket"],
@@ -32,50 +32,68 @@ const Meet = ({ roomId }: { roomId: string }) => {
       if (peerConnection.current) {
         peerConnection.current.close();
       }
-
+    
       try {
-        const iceServers = await getTurnCredentials();
-        console.log("TURN Credentials:", iceServers);
+        // 🔥 Replace API call with static TURN credentials
+        const iceServers = [
+          // { urls: "stun:stun.l.google.com:19302" },
+          // { urls: "stun:stun1.l.google.com:19302" },
+          // { urls: "stun:stun2.l.google.com:19302" },
+          // { urls: "stun:stun3.l.google.com:19302" },
+          // { urls: "stun:stun4.l.google.com:19302" },
+          {
+            urls: "turn:global.relay.metered.ca:443",
+            username: "3e80be6ddc838075dfff6666",
+            credential: "zAEDcjL7uGfwlNVT"
+          },
+          {
+            urls: "turns:global.relay.metered.ca:443?transport=tcp",
+            username: "3e80be6ddc838075dfff6666",
+            credential: "zAEDcjL7uGfwlNVT"
+          }
+        ];
+    
+        console.log("Using ICE servers:", iceServers);
+    
         const config: RTCConfiguration = {
           iceServers,
-          iceTransportPolicy: "relay", // Force TURN for all connections
+          iceTransportPolicy: "relay" // 🔥 Force TURN-only mode
         };
-
-        console.log("Using ICE servers:", iceServers);
+    
         peerConnection.current = new RTCPeerConnection(config);
-
+    
         peerConnection.current.onicecandidate = (event) => {
           if (event.candidate) {
             console.log("Sending ICE candidate:", event.candidate);
             socket.emit("ice-candidate", { roomId, candidate: event.candidate });
           }
         };
-
+    
         peerConnection.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0];
           }
         };
-
+    
         peerConnection.current.onconnectionstatechange = () => {
           const state = peerConnection.current?.connectionState || "unknown";
           console.log("Connection state:", state);
           setConnectionState(state);
           setIsConnected(state === "connected");
-
+    
           if (state === "failed" || state === "disconnected") {
             setError(`Connection ${state}. You might need to refresh and try again.`);
           }
         };
-
+    
         peerConnection.current.onicegatheringstatechange = () => {
           console.log("ICE gathering state:", peerConnection.current?.iceGatheringState);
         };
-
+    
         peerConnection.current.oniceconnectionstatechange = () => {
           const iceState = peerConnection.current?.iceConnectionState;
           console.log("ICE connection state:", iceState);
-
+    
           if (iceState === "failed") {
             setError("Connection failed. Please check your network and try again.");
           } else if (iceState === "disconnected") {
@@ -87,6 +105,7 @@ const Meet = ({ roomId }: { roomId: string }) => {
         setError("Failed to initialize connection. Please try again.");
       }
     };
+    
 
     const startCall = async () => {
       try {
