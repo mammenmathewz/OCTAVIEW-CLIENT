@@ -3,6 +3,11 @@ import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import { IconMusic, IconMusicOff, IconVideo, IconVideoOff, IconPhoneOff } from "@tabler/icons-react";
 
+declare global {
+  interface Window {
+    peerConnection: RTCPeerConnection | null;
+  }
+}
 
 const socket = io("https://server.octaview.tech", {
   transports: ["websocket"],
@@ -27,183 +32,110 @@ const Meet = ({ roomId }: { roomId: string }) => {
       navigate("/");
       return;
     }
-
+  
     const initializePeerConnection = async () => {
       if (peerConnection.current) {
         peerConnection.current.close();
       }
-    
+  
       try {
-        // 🔥 Replace API call with static TURN credentials
         const iceServers = [
-          // { urls: "stun:stun.l.google.com:19302" },
-          // { urls: "stun:stun1.l.google.com:19302" },
-          // { urls: "stun:stun2.l.google.com:19302" },
-          // { urls: "stun:stun3.l.google.com:19302" },
-          // { urls: "stun:stun4.l.google.com:19302" },
           {
             urls: "turn:global.relay.metered.ca:443",
             username: "3e80be6ddc838075dfff6666",
-            credential: "zAEDcjL7uGfwlNVT"
+            credential: "zAEDcjL7uGfwlNVT",
           },
           {
             urls: "turns:global.relay.metered.ca:443?transport=tcp",
             username: "3e80be6ddc838075dfff6666",
-            credential: "zAEDcjL7uGfwlNVT"
-          }
+            credential: "zAEDcjL7uGfwlNVT",
+          },
         ];
-    
+  
         console.log("Using ICE servers:", iceServers);
-    
+  
         const config: RTCConfiguration = {
           iceServers,
-          iceTransportPolicy: "relay" // 🔥 Force TURN-only mode
+          iceTransportPolicy: "relay",
         };
-    
+  
         peerConnection.current = new RTCPeerConnection(config);
-    
+  
         peerConnection.current.onicecandidate = (event) => {
           if (event.candidate) {
             console.log("Sending ICE candidate:", event.candidate);
             socket.emit("ice-candidate", { roomId, candidate: event.candidate });
           }
         };
-    
+  
         peerConnection.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0];
           }
         };
-    
+  
         peerConnection.current.onconnectionstatechange = () => {
           const state = peerConnection.current?.connectionState || "unknown";
           console.log("Connection state:", state);
           setConnectionState(state);
           setIsConnected(state === "connected");
-    
+  
           if (state === "failed" || state === "disconnected") {
             setError(`Connection ${state}. You might need to refresh and try again.`);
           }
         };
-    
+  
         peerConnection.current.onicegatheringstatechange = () => {
           console.log("ICE gathering state:", peerConnection.current?.iceGatheringState);
         };
-    
+  
         peerConnection.current.oniceconnectionstatechange = () => {
           const iceState = peerConnection.current?.iceConnectionState;
           console.log("ICE connection state:", iceState);
-    
+  
           if (iceState === "failed") {
             setError("Connection failed. Please check your network and try again.");
           } else if (iceState === "disconnected") {
             setError("Connection temporarily disconnected. Attempting to reconnect...");
           }
         };
+  
+        // ✅ Expose peerConnection in the DevTools console
+        window.peerConnection = peerConnection.current;
       } catch (error) {
         console.error("Failed to initialize peer connection:", error);
         setError("Failed to initialize connection. Please try again.");
       }
     };
-    
-
+  
     const startCall = async () => {
       try {
         localStream.current = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         });
-
+  
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStream.current;
         }
-
-        await initializePeerConnection();
-
+  
+        await initializePeerConnection(); // Ensure peerConnection is set before exposing it
+  
         if (peerConnection.current && localStream.current) {
           localStream.current.getTracks().forEach((track) => {
             peerConnection.current?.addTrack(track, localStream.current!);
           });
         }
-
+  
         socket.emit("join-room", roomId);
       } catch (err) {
         console.error("Error starting call:", err);
         setError("Failed to access camera/microphone. Please ensure permissions are granted.");
       }
     };
-
-    socket.on("user-joined", async () => {
-      console.log("User joined the room - creating offer");
-      try {
-        if (peerConnection.current) {
-          const offer = await peerConnection.current.createOffer();
-          await peerConnection.current.setLocalDescription(offer);
-          socket.emit("offer", { roomId, offer });
-        }
-      } catch (err) {
-        console.error("Error creating offer:", err);
-        setError("Failed to create connection offer. Please refresh and try again.");
-      }
-    });
-
-    socket.on("offer", async ({ offer }) => {
-      console.log("Received offer from peer");
-      try {
-        if (peerConnection.current) {
-          await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
-          const answer = await peerConnection.current.createAnswer();
-          await peerConnection.current.setLocalDescription(answer);
-          socket.emit("answer", { roomId, answer });
-
-          while (pendingCandidates.current.length) {
-            const candidate = pendingCandidates.current.shift();
-            if (candidate && peerConnection.current) {
-              await peerConnection.current.addIceCandidate(candidate);
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error handling offer:", err);
-        setError("Failed to handle connection offer. Please refresh and try again.");
-      }
-    });
-
-    socket.on("answer", async ({ answer }) => {
-      console.log("Received answer from peer");
-      try {
-        if (peerConnection.current) {
-          await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
-        }
-      } catch (err) {
-        console.error("Error handling answer:", err);
-        setError("Failed to establish connection. Please refresh and try again.");
-      }
-    });
-
-    socket.on("ice-candidate", async ({ candidate }) => {
-      console.log("Received ICE candidate:", candidate);
-      try {
-        if (peerConnection.current?.remoteDescription) {
-          await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
-        } else {
-          pendingCandidates.current.push(new RTCIceCandidate(candidate));
-        }
-      } catch (err) {
-        console.error("Error handling ICE candidate:", err);
-      }
-    });
-
-    socket.on("user-disconnected", () => {
-      console.log("Remote user disconnected");
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = null;
-      }
-      setIsConnected(false);
-    });
-
+  
     startCall();
-
+  
     return () => {
       localStream.current?.getTracks().forEach((track) => track.stop());
       peerConnection.current?.close();
@@ -214,7 +146,8 @@ const Meet = ({ roomId }: { roomId: string }) => {
       socket.off("ice-candidate");
       socket.off("user-disconnected");
     };
-  }, [roomId, navigate]);
+  }, [roomId, navigate]); // Dependency array remains unchanged
+  
 
   const toggleMic = () => {
     if (localStream.current) {
