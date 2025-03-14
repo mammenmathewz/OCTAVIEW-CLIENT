@@ -458,7 +458,7 @@ return (
         </div>
       </section>
       <VideoPlayerModal 
-    videoSrc={"https://octaview-data.s3.ap-south-1.amazonaws.com/images/invideo-ai-480+Revolutionize+Your+Hiring+with+Octaview!+2025-03-14.mp4"} // Update with your actual video source
+    videoSrc="https://octaview-data.s3.ap-south-1.amazonaws.com/images/invideo-ai-480+Revolutionize+Your+Hiring+with+Octaview!+2025-03-14.mp4"
     isOpen={isVideoModalOpen}
     onClose={() => setIsVideoModalOpen(false)}
   />
