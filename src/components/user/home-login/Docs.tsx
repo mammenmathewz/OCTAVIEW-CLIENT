@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Menu, X, Copy, Check, BookOpen, ExternalLink } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../ui/tabs";
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
@@ -130,7 +129,7 @@ export default App;`;
       >
         <ScrollArea className="h-full py-6 px-4">
           <div className="mb-6 px-3">
-            <Badge variant="outline" className="text-blue-400 border-blue-400/30">v1.2.0</Badge>
+            <Badge variant="outline" className="text-blue-400 border-blue-400/30">v0.1.3</Badge>
           </div>
           <nav className="space-y-1">
             {sidebarLinks.map((link) => (
@@ -161,7 +160,7 @@ export default App;`;
                 <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-300">
                   octaview-client
                 </h1>
-                <Badge variant="outline" className="text-blue-400 border-blue-400/30">v1.2.0</Badge>
+                <Badge variant="outline" className="text-blue-400 border-blue-400/30">v0.1.3</Badge>
               </div>
               <p className="text-xl text-zinc-400">
                 A professional React component for seamless job listings integration.
