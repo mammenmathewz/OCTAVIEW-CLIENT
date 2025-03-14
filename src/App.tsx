@@ -8,6 +8,7 @@ import ProtectedRoute from "./utils/ProtectedRoutes";
 import ErrorBoundary from "./utils/ErrorBoundary";
 import DashboardOverview from "./components/user/Console/DashboardOverview";
 import PaymentSuccess from "./pages/user/PaymentSuccess";
+import  FullPageLoader from "./components/ui/loder"
 
 // Lazy load components
 const CandidateList = lazy(() => import("./pages/user/CandidateList"));
@@ -23,7 +24,7 @@ function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<FullPageLoader/>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/docs" element={<Doc />} />

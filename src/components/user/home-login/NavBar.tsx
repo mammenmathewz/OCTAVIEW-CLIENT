@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, RefObject } from "react";
 import { cn } from "../../../lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,12 +11,10 @@ import {
 } from "lucide-react";
 import { Button } from "../../ui/button";
 
-
-const Navbar = () => {
+const Navbar = ({ pricingRef }: { pricingRef: RefObject<HTMLElement> }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +35,15 @@ const Navbar = () => {
   const login = () => {
     navigate('/login');
   };
+  const scrollToPricing = () => {
+    if (pricingRef && pricingRef.current) {
+      window.scrollTo({
+        top: pricingRef.current.offsetTop,
+        behavior: 'smooth',
+      });
+    }
+  };
+
 
   return (
     <div 
@@ -64,35 +71,27 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
+            <Button onClick={scrollToPricing} variant="ghost" size="sm">
+              Pricing
+            </Button>
             
+            {/* Updated Docs link to open in a new tab */}
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/pricing">Pricing</Link>
-            </Button>
-            
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/docs" className="flex items-center space-x-1">
+              <a href="/docs" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1">
                 <span>Docs</span>
                 <ExternalLink className="h-3.5 w-3.5" />
-              </Link>
+              </a>
             </Button>
             
             <div className="mx-1 h-5 border-r border-gray-300" />
-            
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="text-gray-700 hover:text-gray-900"
-              onClick={login}
-            >
-              Login
-            </Button>
+           
             
             <Button 
               size="sm" 
               className="bg-black text-white hover:bg-gray-800"
-              onClick={() => navigate('/signup')}
+              onClick={login}
             >
-              Get Started
+             Login
             </Button>
           </div>
 
@@ -124,7 +123,6 @@ const Navbar = () => {
             className="md:hidden border-t border-gray-200 bg-white"
           >
             <div className="py-2 px-4 space-y-1">
-             
               <Link 
                 to="/pricing" 
                 className="block py-2 px-3 rounded-md hover:bg-gray-100 font-medium"
@@ -132,13 +130,16 @@ const Navbar = () => {
               >
                 Pricing
               </Link>
-              <Link 
-                to="/docs" 
+              {/* Mobile Docs link updated to open in a new tab */}
+              <a 
+                href="/docs" 
+                target="_blank" 
+                rel="noopener noreferrer" 
                 className="block py-2 px-3 rounded-md hover:bg-gray-100 font-medium"
                 onClick={() => setIsOpen(false)}
               >
                 Docs
-              </Link>
+              </a>
               <div className="py-2 border-t border-gray-100">
                 <Button 
                   variant="ghost" 

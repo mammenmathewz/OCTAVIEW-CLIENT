@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../../lib/utils";
 import { Button } from "../../ui/button";
@@ -34,7 +34,8 @@ import VideoPlayerModal from '../home-login/Video-Plaayer'
 import videoFile from '../../../assets/test.mp4'
 
 
-const LandingPage = () => {
+
+const LandingPage = forwardRef<HTMLDivElement, {}>((_, ref)  => {
   
   const features = [
     {
@@ -125,13 +126,13 @@ const LandingPage = () => {
   ];
 
   // For the floating elements in the hero section
-  const [ref, inView] = useInView({
+  const [inViewRef, inView] = useInView({
     triggerOnce: false,
     threshold: 0.1,
   });
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  return (
+return (
     <div className="relative w-full overflow-hidden bg-white">
       {/* Hero Section with Enhanced Animations */}
       <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
@@ -193,7 +194,7 @@ const LandingPage = () => {
           </div>
           
           {/* Enhanced Hero Mockup with Floating Elements */}
-          <div ref={ref} className="mt-20 relative mx-auto max-w-5xl">
+          <div ref={inViewRef} className="mt-20 relative mx-auto max-w-5xl">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
@@ -341,7 +342,7 @@ const LandingPage = () => {
       </section>
       
       {/* Pricing Section (Replacing Social Proof) */}
-      <section className="py-24 bg-gray-50">
+      <section ref={ref} className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-green-100 text-green-700 hover:bg-green-100 px-4 py-1 text-sm rounded-full">Pricing</Badge>
@@ -463,7 +464,7 @@ const LandingPage = () => {
   />
     </div>
   );
-};
+});
 
 export default LandingPage;
 
