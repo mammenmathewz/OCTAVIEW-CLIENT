@@ -209,7 +209,6 @@ const VideoPlayerModal = ({
           >
             {/* Glass-like header */}
             <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 bg-black bg-opacity-50 backdrop-blur-sm">
-              <h3 className="text-lg font-medium text-white">Octaview Demo</h3>
               <Button
                 variant="ghost"
                 size="icon"
