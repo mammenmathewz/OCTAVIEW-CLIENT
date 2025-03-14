@@ -31,7 +31,7 @@ import { TracingBeam } from "../../ui/tracing-beam";
 import { useInView } from "react-intersection-observer";
 import web_octaview from '../../../assets/web_octaview.png'
 import VideoPlayerModal from '../home-login/Video-Plaayer'
-import videoFile from '../../../assets/test.mp4'
+
 
 
 
@@ -458,7 +458,7 @@ return (
         </div>
       </section>
       <VideoPlayerModal 
-    videoSrc={videoFile} // Update with your actual video source
+    videoSrc={"https://octaview-data.s3.ap-south-1.amazonaws.com/images/invideo-ai-480+Revolutionize+Your+Hiring+with+Octaview!+2025-03-14.mp4"} // Update with your actual video source
     isOpen={isVideoModalOpen}
     onClose={() => setIsVideoModalOpen(false)}
   />

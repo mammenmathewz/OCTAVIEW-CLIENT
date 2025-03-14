@@ -25,6 +25,7 @@ export function SignupForm() {
   });
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [passwordFocus, setPasswordFocus] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast()
@@ -93,9 +94,10 @@ export function SignupForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     try {
       if (step === 1) {
+        setIsLoading(true); // Set loading to true before generating OTP
         await generateOtp(formData.email);
         setStep(step + 1);
         startCountdown();
@@ -118,6 +120,8 @@ export function SignupForm() {
         description: error.message || 'An unexpected error occurred while generating OTP',
         variant: 'destructive',
       });
+    } finally {
+      setIsLoading(false); // Set loading to false after the operation completes
     }
   };
 
@@ -232,11 +236,16 @@ export function SignupForm() {
               />
             </LabelInputContainer>
             <button
-              className="bg-gradient-to-br relative group/btn from-black to-neutral-600 block w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
-            >
-              Next &rarr;
-              <BottomGradient />
-            </button>
+  className={cn(
+    "bg-gradient-to-br relative group/btn from-black to-neutral-600 block w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]",
+    isLoading && "cursor-wait" // Change cursor when loading
+  )}
+  type="submit"
+  disabled={isLoading} // Disable the button when loading
+>
+  {isLoading ? "Loading..." : "Next →"} {/* Show loading text */}
+  <BottomGradient />
+</button>
           </>
         )}
         {step === 2 && (
