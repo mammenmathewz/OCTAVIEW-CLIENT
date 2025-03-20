@@ -80,7 +80,7 @@ const Meet = ({ roomId }: { roomId: string }) => {
           },
         ];
   
-        console.log("Initializing peer connection with ICE servers:", iceServers);
+
   
         const config: RTCConfiguration = {
           iceServers,

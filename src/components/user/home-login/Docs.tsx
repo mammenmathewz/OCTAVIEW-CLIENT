@@ -112,7 +112,7 @@ export default App;`;
 
           <div className="flex items-center gap-4">
             <Button variant="secondary" size="sm" className="hidden md:flex">
-              <ExternalLink className="h-4 w-4 mr-2" />
+              <ExternalLink className="h-4 w-4 mr-2" href='https://github.com/Octaview-b2b/octaview-client-pkg' target='_blank' />
               GitHub
             </Button>
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
