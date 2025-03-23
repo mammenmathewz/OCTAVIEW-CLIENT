@@ -78,7 +78,7 @@ function Login() {
         </p>
       </div>
       <p className="text-sm text-gray-500 mb-4">
-        You can apply to existing jobs or create new job postings to experience the full functionality.
+        You can apply to existing jobs on demo website or create new job postings to experience the full functionality.
       </p>
     </div>
   
