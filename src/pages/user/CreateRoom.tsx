@@ -171,7 +171,7 @@ const CreateRoom = () => {
                 <p className="text-sm font-medium text-gray-700 mb-1">
                   Meeting URL
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-black">
                   <input
                     type="text"
                     value={meetingUrl}
