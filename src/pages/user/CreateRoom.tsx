@@ -180,7 +180,7 @@ const CreateRoom = () => {
                   />
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="link"
                     onClick={copyToClipboard}
                     className="flex-shrink-0"
                   >
